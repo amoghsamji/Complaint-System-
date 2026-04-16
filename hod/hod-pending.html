@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Escalated Complaints — KLE Tech CMS HOD</title>
+  <script>(function(){ var s=localStorage.getItem('cms-theme')||'light'; document.documentElement.setAttribute('data-theme',s); })();</script>
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    .filter-bar { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 1rem 1.5rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; box-shadow: var(--shadow); }
+    .search-wrap { flex: 1; position: relative; min-width: 180px; }
+    .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 15px; }
+
+    /* Escalated row highlight */
+    tr.escalated-row td { background: rgba(198,40,40,0.03); }
+    tr.escalated-row:hover td { background: rgba(198,40,40,0.07); }
+    [data-theme="dark"] tr.escalated-row td { background: rgba(198,40,40,0.06); }
+
+    /* Days pending pill */
+    .days-pill { display: inline-flex; align-items: center; gap: 5px; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; font-family: 'Sora', sans-serif; }
+    .days-pill.critical { background: #fce4ec; color: #b71c1c; }
+    .days-pill.warning { background: #fff3e0; color: #e65100; }
+    .days-pill.normal { background: #e8f5e9; color: #1b5e20; }
+    [data-theme="dark"] .days-pill.critical { background: #3d0d12; color: #ef9a9a; }
+    [data-theme="dark"] .days-pill.warning { background: #3d2800; color: #ffcc80; }
+    [data-theme="dark"] .days-pill.normal { background: #0d2e1a; color: #a5d6a7; }
+
+    /* Pulse dot */
+    .pulse-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--danger); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+    .escalation-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; margin-bottom: 1.5rem; }
+    .esc-stat { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 1.2rem; box-shadow: var(--shadow); display: flex; align-items: center; gap: 14px; }
+    .esc-stat-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+    .esc-stat-icon.red { background: #fce4ec; }
+    .esc-stat-icon.orange { background: #fff3e0; }
+    .esc-stat-icon.blue { background: #e3f2fd; }
+    [data-theme="dark"] .esc-stat-icon.red { background: #3d0d12; }
+    [data-theme="dark"] .esc-stat-icon.orange { background: #3d2800; }
+    [data-theme="dark"] .esc-stat-icon.blue { background: #0d2a3d; }
+    .esc-stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); font-family: 'Sora', sans-serif; font-weight: 500; }
+    .esc-stat-value { font-size: 26px; font-weight: 800; font-family: 'Sora', sans-serif; }
+    .esc-stat-value.red { color: var(--danger); }
+    .esc-stat-value.orange { color: var(--warning); }
+    .esc-stat-value.blue { color: var(--primary); }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-brand">
+      <div class="logo-box">K</div>
+      <div><span>KLE Tech CMS</span><small>cms.kletech.ac.in</small></div>
+    </div>
+    <div class="nav-links">
+      <a href="hod-home.html">🏠 Home</a>
+      <a href="hod-pending.html" class="active">🚨 Escalated Complaints</a>
+    </div>
+    <div class="nav-right">
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌙</button>
+      <div class="nav-user">
+        <span class="role-badge">🎓 HOD</span>
+        <div class="avatar" style="background:#7b1fa2;color:#fff;">VP</div>
+        <div><div style="font-size:13px;font-weight:600;">Dr. Vijay Patil</div><div style="font-size:11px;opacity:0.7;">HOD — CSE Department</div></div>
+        <a href="../login.html" class="nav-logout">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">HOD Menu</div>
+        <a href="hod-home.html" class="sidebar-item"><span class="icon">🏠</span> Dashboard</a>
+        <a href="hod-pending.html" class="sidebar-item active"><span class="icon">🚨</span> Escalated Complaints<span class="sidebar-badge" style="background:#c62828;">4</span></a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Filter by Days</div>
+        <div class="sidebar-item" onclick="filterDays(0)"><span class="icon">📋</span> All Escalated (4)</div>
+        <div class="sidebar-item" onclick="filterDays(5)"><span class="icon">🔴</span> Critical (&gt;5 days)</div>
+        <div class="sidebar-item" onclick="filterDays(3)"><span class="icon">🟡</span> Warning (3-5 days)</div>
+        <div class="sidebar-item" onclick="filterDays(1)"><span class="icon">🟢</span> Recent (1-2 days)</div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="page-header">
+        <div class="breadcrumb">HOD › <span>Escalated Complaints</span></div>
+        <h1>🚨 Escalated &amp; Pending Complaints</h1>
+        <p>Complaints from CSE department that have exceeded the 5-day SLA or been manually escalated.</p>
+      </div>
+
+      <div class="alert alert-danger">
+        🚨 <strong>4 complaints</strong> have been escalated. Please contact the responsible admin to expedite resolution before end of week.
+      </div>
+
+      <!-- Escalation Stats -->
+      <div class="escalation-stats">
+        <div class="esc-stat">
+          <div class="esc-stat-icon red">🚨</div>
+          <div>
+            <div class="esc-stat-label">Total Escalated</div>
+            <div class="esc-stat-value red">4</div>
+          </div>
+        </div>
+        <div class="esc-stat">
+          <div class="esc-stat-icon orange">⚠️</div>
+          <div>
+            <div class="esc-stat-label">Critical (&gt;5 days)</div>
+            <div class="esc-stat-value orange">2</div>
+          </div>
+        </div>
+        <div class="esc-stat">
+          <div class="esc-stat-icon blue">📞</div>
+          <div>
+            <div class="esc-stat-label">Avg Days Pending</div>
+            <div class="esc-stat-value blue">3.8</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter Bar -->
+      <div class="filter-bar">
+        <div class="chips">
+          <span class="chip active" onclick="chipClick(this)">All (4)</span>
+          <span class="chip" onclick="chipClick(this)">🔴 Critical</span>
+          <span class="chip" onclick="chipClick(this)">🟡 Warning</span>
+          <span class="chip" onclick="chipClick(this)">🟢 Recent</span>
+        </div>
+        <div style="width:1px;height:24px;background:var(--border);"></div>
+        <select class="form-control" style="width:160px;">
+          <option>All Categories</option>
+          <option>🔌 Electrical</option>
+          <option>💻 IT/WiFi</option>
+          <option>🔧 Infrastructure</option>
+        </select>
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="form-control" placeholder="Search escalations…" style="padding-left:36px;" oninput="liveSearch(this.value)">
+        </div>
+      </div>
+
+      <!-- Complaints Table -->
+      <div class="card">
+        <div style="padding:1.2rem 1.5rem;border-bottom:1.5px solid var(--border);display:flex;align-items:center;gap:10px;">
+          <span class="pulse-dot"></span>
+          <h3 style="font-family:'Sora',sans-serif;font-size:16px;font-weight:700;">Live Escalation Queue</h3>
+          <span style="margin-left:auto;font-size:12px;color:var(--text-muted);">Auto-refreshes every 5 min</span>
+        </div>
+        <div class="table-wrap">
+          <table id="escalationTable">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Category</th>
+                <th>Urgency</th>
+                <th>Subject</th>
+                <th>Filed By</th>
+                <th>⏰ Days Pending</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="escalated-row">
+                <td><span class="complaint-id">#CMS-2025-0031</span></td>
+                <td>🔌 Electrical</td>
+                <td><span class="badge badge-high">🔥 High</span></td>
+                <td style="font-weight:600;">Power failure in Computer Lab B</td>
+                <td>Arjun M. <span style="font-size:11px;color:var(--text-muted);">(Student)</span></td>
+                <td><span class="days-pill critical">🔴 6 days</span></td>
+                <td><span class="badge badge-escalated">🚨 Escalated</span></td>
+                <td><a href="hod-admin-contact.html?id=CMS-2025-0031" class="btn btn-sm btn-accent">Contact Admin →</a></td>
+              </tr>
+              <tr class="escalated-row">
+                <td><span class="complaint-id">#CMS-2025-0028</span></td>
+                <td>🔧 Infrastructure</td>
+                <td><span class="badge badge-medium">⚡ Medium</span></td>
+                <td style="font-weight:600;">Broken chairs in Seminar Hall</td>
+                <td>Prof. Kiran J. <span style="font-size:11px;color:var(--text-muted);">(Faculty)</span></td>
+                <td><span class="days-pill critical">🔴 5 days</span></td>
+                <td><span class="badge badge-escalated">🚨 Escalated</span></td>
+                <td><a href="hod-admin-contact.html?id=CMS-2025-0028" class="btn btn-sm btn-accent">Contact Admin →</a></td>
+              </tr>
+              <tr class="escalated-row">
+                <td><span class="complaint-id">#CMS-2025-0040</span></td>
+                <td>🔧 Infra</td>
+                <td><span class="badge badge-high">🔥 High</span></td>
+                <td style="font-weight:600;">Projector malfunction Room 301</td>
+                <td>Dr. Ramesh K. <span style="font-size:11px;color:var(--text-muted);">(Faculty)</span></td>
+                <td><span class="days-pill warning">🟡 3 days</span></td>
+                <td><span class="badge badge-escalated">🚨 Escalated</span></td>
+                <td><a href="hod-admin-contact.html?id=CMS-2025-0040" class="btn btn-sm btn-accent">Contact Admin →</a></td>
+              </tr>
+              <tr class="escalated-row">
+                <td><span class="complaint-id">#CMS-2025-0035</span></td>
+                <td>💻 IT/WiFi</td>
+                <td><span class="badge badge-medium">⚡ Medium</span></td>
+                <td style="font-weight:600;">WiFi not working in Lab 3</td>
+                <td>Sneha P. <span style="font-size:11px;color:var(--text-muted);">(Student)</span></td>
+                <td><span class="days-pill normal">🟢 1 day</span></td>
+                <td><span class="badge badge-escalated">🚨 Escalated</span></td>
+                <td><a href="hod-admin-contact.html?id=CMS-2025-0035" class="btn btn-sm btn-accent">Contact Admin →</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="padding:1rem 1.5rem;border-top:1.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:13px;color:var(--text-muted);">4 escalated complaints — CSE Department</span>
+          <a href="hod-home.html" class="btn btn-ghost btn-sm">← Back to Dashboard</a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <footer><strong>KLE Technological University CMS</strong> — Web Technologies &amp; SE Project — 2025</footer>
+  <script>
+    function chipClick(el) { document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active')); el.classList.add('active'); }
+    function liveSearch(val) {
+      val = val.toLowerCase();
+      document.querySelectorAll('#escalationTable tbody tr').forEach(tr => {
+        tr.style.display = tr.textContent.toLowerCase().includes(val) ? '' : 'none';
+      });
+    }
+    function filterDays(n) {}
+    function toggleTheme() {
+      var html = document.documentElement;
+      var next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('cms-theme', next);
+      document.getElementById('themeToggle').textContent = next === 'dark' ? '☀️' : '🌙';
+    }
+    document.getElementById('themeToggle').textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+  </script>
+</body>
+</html>

@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Contact — KLE Tech CMS HOD</title>
+  <script>(function(){ var s=localStorage.getItem('cms-theme')||'light'; document.documentElement.setAttribute('data-theme',s); })();</script>
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    .contact-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 1.5rem; }
+
+    /* Complaint Summary Banner */
+    .complaint-banner { background: linear-gradient(135deg, #4a148c 0%, #7b1fa2 100%); border-radius: var(--radius); padding: 1.5rem 2rem; color: #fff; margin-bottom: 1.5rem; }
+    .complaint-banner .cid { font-family: 'Sora', sans-serif; font-size: 13px; opacity: 0.75; margin-bottom: 4px; }
+    .complaint-banner h2 { font-size: 20px; margin-bottom: 10px; }
+    .complaint-banner-meta { display: flex; gap: 10px; flex-wrap: wrap; }
+    .complaint-banner-meta span { background: rgba(255,255,255,0.18); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+
+    /* Admin Contact Card */
+    .admin-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+    .admin-card-header { padding: 1.2rem 1.5rem; border-bottom: 1.5px solid var(--border); font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+    .admin-card-body { padding: 1.5rem; }
+    .admin-avatar-large { width: 72px; height: 72px; border-radius: 18px; background: linear-gradient(135deg, #1a237e, #1565c0); display: flex; align-items: center; justify-content: center; font-family: 'Sora', sans-serif; font-size: 26px; font-weight: 800; color: #fff; margin: 0 auto 1rem; box-shadow: 0 8px 24px rgba(26,35,126,0.30); }
+    .admin-name { text-align: center; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+    .admin-title { text-align: center; font-size: 13px; color: var(--text-muted); margin-bottom: 1.5rem; }
+    .admin-detail-rows { display: flex; flex-direction: column; gap: 12px; }
+    .admin-detail-row { display: flex; align-items: center; gap: 14px; padding: 12px; background: var(--surface-2); border-radius: 10px; border: 1.5px solid var(--border); transition: all 0.2s; }
+    .admin-detail-row:hover { border-color: var(--primary); background: var(--primary-soft); }
+    [data-theme="dark"] .admin-detail-row:hover { background: #1e2456; }
+    .admin-detail-icon { font-size: 22px; width: 36px; height: 36px; background: var(--surface); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: var(--shadow); }
+    .admin-detail-label { font-size: 11px; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; font-family: 'Sora', sans-serif; }
+    .admin-detail-value { font-size: 14px; font-weight: 600; }
+    .admin-contact-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 1.5rem; }
+    .contact-btn-large { padding: 16px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; border: none; font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 700; transition: all 0.2s; text-decoration: none; }
+    .contact-btn-large.call { background: var(--success); color: #fff; }
+    .contact-btn-large.call:hover { filter: brightness(1.1); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,137,123,0.35); }
+    .contact-btn-large.email { background: var(--primary); color: #fff; }
+    .contact-btn-large.email:hover { filter: brightness(1.1); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(26,35,126,0.35); }
+    .contact-btn-icon { font-size: 28px; }
+
+    /* Complaint Detail Card */
+    .detail-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+    .detail-card-header { padding: 1.2rem 1.5rem; border-bottom: 1.5px solid var(--border); font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 700; }
+    .detail-card-body { padding: 1.5rem; }
+    .detail-field { margin-bottom: 1.2rem; }
+    .detail-field label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 6px; font-family: 'Sora', sans-serif; }
+    .detail-field p { font-size: 14px; font-weight: 500; }
+    .detail-field .desc-box { background: var(--surface-2); border: 1.5px solid var(--border); border-radius: 9px; padding: 12px; font-size: 14px; line-height: 1.6; }
+    .urgency-banner { display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: 10px; margin-top: 8px; }
+    .urgency-banner.high { background: #fce4ec; border: 1.5px solid #ef9a9a; }
+    [data-theme="dark"] .urgency-banner.high { background: #3d0d12; border-color: #7f1d1d; }
+    .urgency-banner-icon { font-size: 24px; }
+    .urgency-banner-text strong { display: block; font-size: 14px; font-weight: 700; color: var(--danger); }
+    .urgency-banner-text span { font-size: 12px; color: var(--text-muted); }
+
+    /* Timeline / Status tracker */
+    .status-tracker { display: flex; gap: 0; margin-bottom: 1.5rem; }
+    .status-step { flex: 1; text-align: center; position: relative; }
+    .status-step:not(:last-child)::after { content: ''; position: absolute; top: 14px; right: -50%; width: 100%; height: 2px; background: var(--border); z-index: 0; }
+    .status-step.done:not(:last-child)::after { background: var(--success); }
+    .status-step-dot { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; margin: 0 auto 6px; z-index: 1; position: relative; border: 2px solid var(--border); background: var(--surface); }
+    .status-step.done .status-step-dot { background: var(--success); border-color: var(--success); color: #fff; }
+    .status-step.active .status-step-dot { background: var(--danger); border-color: var(--danger); color: #fff; animation: pulse-border 1.5s infinite; }
+    @keyframes pulse-border { 0%,100%{box-shadow:0 0 0 0 rgba(198,40,40,0.4);} 50%{box-shadow:0 0 0 6px rgba(198,40,40,0);} }
+    .status-step-label { font-size: 11px; font-weight: 600; color: var(--text-muted); font-family: 'Sora', sans-serif; }
+    .status-step.done .status-step-label { color: var(--success); }
+    .status-step.active .status-step-label { color: var(--danger); }
+
+    /* Message compose area */
+    .message-area { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+    .message-area-header { padding: 1.2rem 1.5rem; border-bottom: 1.5px solid var(--border); font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 700; }
+    .message-area-body { padding: 1.5rem; }
+
+    @media(max-width:900px) { .contact-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-brand">
+      <div class="logo-box">K</div>
+      <div><span>KLE Tech CMS</span><small>cms.kletech.ac.in</small></div>
+    </div>
+    <div class="nav-links">
+      <a href="hod-home.html">🏠 Home</a>
+      <a href="hod-pending.html" class="active">🚨 Escalated Complaints</a>
+    </div>
+    <div class="nav-right">
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌙</button>
+      <div class="nav-user">
+        <span class="role-badge">🎓 HOD</span>
+        <div class="avatar" style="background:#7b1fa2;color:#fff;">VP</div>
+        <div><div style="font-size:13px;font-weight:600;">Dr. Vijay Patil</div><div style="font-size:11px;opacity:0.7;">HOD — CSE Department</div></div>
+        <a href="../login.html" class="nav-logout">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">HOD Menu</div>
+        <a href="hod-home.html" class="sidebar-item"><span class="icon">🏠</span> Dashboard</a>
+        <a href="hod-pending.html" class="sidebar-item active"><span class="icon">🚨</span> Escalated Complaints<span class="sidebar-badge" style="background:#c62828;">4</span></a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Other Escalations</div>
+        <a href="hod-admin-contact.html?id=CMS-2025-0031" class="sidebar-item"><span class="icon">🔴</span> #CMS-2025-0031</a>
+        <a href="hod-admin-contact.html?id=CMS-2025-0028" class="sidebar-item"><span class="icon">🔴</span> #CMS-2025-0028</a>
+        <a href="hod-admin-contact.html?id=CMS-2025-0040" class="sidebar-item active"><span class="icon">🟡</span> #CMS-2025-0040</a>
+        <a href="hod-admin-contact.html?id=CMS-2025-0035" class="sidebar-item"><span class="icon">🟢</span> #CMS-2025-0035</a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="page-header">
+        <div class="breadcrumb">HOD › <a href="hod-pending.html" style="color:var(--primary);font-weight:600;">Escalated Complaints</a> › <span>Admin Contact</span></div>
+        <h1>📞 Admin Contact — <span style="color:#7b1fa2;">Complaint #CMS-2025-0040</span></h1>
+        <p>View complaint details and contact the responsible system administrator for this escalation.</p>
+      </div>
+
+      <!-- Complaint Summary Banner -->
+      <div class="complaint-banner">
+        <div class="cid">🚨 ESCALATED COMPLAINT</div>
+        <h2>Projector malfunction in Room 301 — CSE Block</h2>
+        <div class="complaint-banner-meta">
+          <span>#CMS-2025-0040</span>
+          <span>🔧 Infrastructure</span>
+          <span>🔥 High Urgency</span>
+          <span>⏰ 3 Days Pending</span>
+          <span>🚨 Escalated</span>
+        </div>
+      </div>
+
+      <!-- Status Tracker -->
+      <div class="card" style="padding:1.5rem;margin-bottom:1.5rem;">
+        <div style="font-family:'Sora',sans-serif;font-size:14px;font-weight:700;margin-bottom:1.2rem;">📊 Complaint Progress</div>
+        <div class="status-tracker">
+          <div class="status-step done">
+            <div class="status-step-dot">✓</div>
+            <div class="status-step-label">Filed</div>
+          </div>
+          <div class="status-step done">
+            <div class="status-step-dot">✓</div>
+            <div class="status-step-label">Reviewed</div>
+          </div>
+          <div class="status-step active">
+            <div class="status-step-dot">🚨</div>
+            <div class="status-step-label">Escalated</div>
+          </div>
+          <div class="status-step">
+            <div class="status-step-dot">4</div>
+            <div class="status-step-label">Assigned</div>
+          </div>
+          <div class="status-step">
+            <div class="status-step-dot">5</div>
+            <div class="status-step-label">Resolved</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="contact-grid">
+        <!-- LEFT: Complaint Details -->
+        <div>
+          <div class="detail-card" style="margin-bottom:1.5rem;">
+            <div class="detail-card-header">📋 Complaint Details</div>
+            <div class="detail-card-body">
+              <div class="detail-field">
+                <label>Complaint ID</label>
+                <p><span class="complaint-id">#CMS-2025-0040</span></p>
+              </div>
+              <div class="detail-field">
+                <label>Category</label>
+                <p>🔧 Infrastructure</p>
+              </div>
+              <div class="detail-field">
+                <label>Urgency</label>
+                <div class="urgency-banner high">
+                  <div class="urgency-banner-icon">🔥</div>
+                  <div class="urgency-banner-text">
+                    <strong>High Urgency — 3 Days Pending</strong>
+                    <span>Has exceeded normal resolution SLA and auto-escalated to HOD</span>
+                  </div>
+                </div>
+              </div>
+              <div class="detail-field">
+                <label>Filed By</label>
+                <p>👨‍🏫 Dr. Ramesh Kulkarni &nbsp;<span style="font-size:12px;color:var(--text-muted);">(Faculty — ECE)</span></p>
+              </div>
+              <div class="detail-field">
+                <label>Date Filed</label>
+                <p>📅 April 12, 2025</p>
+              </div>
+              <div class="detail-field">
+                <label>Description</label>
+                <div class="desc-box">
+                  The projector in Room 301 (CSE Block, 3rd Floor) has been non-functional for 3 days. Multiple classes have been disrupted. The lamp appears to have failed. A replacement or repair is urgently needed before the scheduled lab sessions on April 17.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Compose message to admin -->
+          <div class="message-area">
+            <div class="message-area-header">📝 Send Message to Admin</div>
+            <div class="message-area-body">
+              <div class="form-group">
+                <label class="form-label">To</label>
+                <input type="text" class="form-control" value="kavitha@kletech.ac.in" readonly style="background:var(--surface-2);">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Subject</label>
+                <input type="text" class="form-control" value="[ESCALATION] #CMS-2025-0040 — Projector Malfunction Room 301">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Message</label>
+                <textarea class="form-control" rows="4" placeholder="Write your message to the admin...">Dear Kavitha,
+
+I am following up on complaint #CMS-2025-0040 regarding the projector malfunction in Room 301. This has been pending for 3 days and is disrupting classes. Please ensure immediate assignment and resolution.
+
+Regards,
+Dr. Vijay Patil, HOD CSE</textarea>
+              </div>
+              <div style="display:flex;gap:10px;">
+                <button class="btn btn-primary" onclick="sendMessage()">📧 Send Message</button>
+                <button class="btn btn-ghost">✕ Clear</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Admin Contact Card -->
+        <div>
+          <div class="admin-card">
+            <div class="admin-card-header">
+              <span>👤</span> Responsible Admin Contact
+            </div>
+            <div class="admin-card-body">
+              <div class="admin-avatar-large">KM</div>
+              <div class="admin-name">Kavitha M</div>
+              <div class="admin-title">System Administrator — Infrastructure</div>
+
+              <div class="admin-detail-rows">
+                <div class="admin-detail-row">
+                  <div class="admin-detail-icon">📧</div>
+                  <div>
+                    <div class="admin-detail-label">Email</div>
+                    <div class="admin-detail-value">kavitha@kletech.ac.in</div>
+                  </div>
+                </div>
+                <div class="admin-detail-row">
+                  <div class="admin-detail-icon">📞</div>
+                  <div>
+                    <div class="admin-detail-label">Phone</div>
+                    <div class="admin-detail-value" id="phoneDisplay">98XXX XXXXX</div>
+                  </div>
+                </div>
+                <div class="admin-detail-row">
+                  <div class="admin-detail-icon">🏢</div>
+                  <div>
+                    <div class="admin-detail-label">Department</div>
+                    <div class="admin-detail-value">Infrastructure</div>
+                  </div>
+                </div>
+                <div class="admin-detail-row">
+                  <div class="admin-detail-icon">🕐</div>
+                  <div>
+                    <div class="admin-detail-label">Available Hours</div>
+                    <div class="admin-detail-value">9:00 AM – 5:00 PM (Mon–Sat)</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="admin-contact-buttons">
+                <button class="contact-btn-large call" onclick="callAdmin()">
+                  <span class="contact-btn-icon">📞</span>
+                  <span>Call Admin</span>
+                </button>
+                <button class="contact-btn-large email" onclick="emailAdmin()">
+                  <span class="contact-btn-icon">📧</span>
+                  <span>Email Admin</span>
+                </button>
+              </div>
+
+              <!-- Phone callout after clicking Call -->
+              <div id="phoneCallout" style="display:none;margin-top:12px;" class="alert alert-success">
+                📞 <strong>98XXX XXXXX</strong> — Calling Kavitha M's registered mobile number…
+              </div>
+            </div>
+          </div>
+
+          <!-- Previous Interactions -->
+          <div class="card mt-2">
+            <div class="card-header"><h3>🕐 Recent Interactions</h3></div>
+            <div class="card-body" style="padding:1rem 1.5rem;">
+              <ul class="timeline">
+                <li class="timeline-item">
+                  <div class="timeline-dot done">✓</div>
+                  <div class="timeline-content">
+                    <div class="timeline-title">Complaint Filed</div>
+                    <div class="timeline-date">Apr 12, 2025 — 10:30 AM</div>
+                    <div class="timeline-desc">Filed by Dr. Ramesh Kulkarni</div>
+                  </div>
+                </li>
+                <li class="timeline-item">
+                  <div class="timeline-dot done">✓</div>
+                  <div class="timeline-content">
+                    <div class="timeline-title">Reviewed by Admin</div>
+                    <div class="timeline-date">Apr 12, 2025 — 2:00 PM</div>
+                    <div class="timeline-desc">Pending assignment — worker unavailable</div>
+                  </div>
+                </li>
+                <li class="timeline-item">
+                  <div class="timeline-dot active">🚨</div>
+                  <div class="timeline-content">
+                    <div class="timeline-title">Auto-Escalated to HOD</div>
+                    <div class="timeline-date">Apr 15, 2025 — 9:00 AM</div>
+                    <div class="timeline-desc">SLA exceeded — escalated to Dr. Vijay Patil</div>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="alert alert-info mt-2">
+            💡 <strong>Tip:</strong> You can also navigate to other escalated complaints using the sidebar links on the left.
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <footer><strong>KLE Technological University CMS</strong> — Web Technologies &amp; SE Project — 2025</footer>
+  <script>
+    function callAdmin() {
+      document.getElementById('phoneCallout').style.display = 'block';
+    }
+    function emailAdmin() {
+      // Scroll to message area and focus
+      document.querySelector('.message-area').scrollIntoView({ behavior: 'smooth' });
+      document.querySelector('.message-area textarea').focus();
+    }
+    function sendMessage() {
+      var a = document.createElement('div');
+      a.className = 'alert alert-success mt-2';
+      a.innerHTML = '✅ <strong>Message sent to Kavitha M (kavitha@kletech.ac.in)</strong> regarding complaint #CMS-2025-0040.';
+      document.querySelector('.message-area-body').appendChild(a);
+      setTimeout(() => a.remove(), 4000);
+    }
+    function toggleTheme() {
+      var html = document.documentElement;
+      var next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('cms-theme', next);
+      document.getElementById('themeToggle').textContent = next === 'dark' ? '☀️' : '🌙';
+    }
+    document.getElementById('themeToggle').textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+
+    // Read complaint ID from URL params
+    var params = new URLSearchParams(window.location.search);
+    var id = params.get('id');
+    if (id) {
+      document.querySelectorAll('.complaint-id, .cid ~ h2').forEach(el => {
+        // keep consistent
+      });
+    }
+  </script>
+</body>
+</html>
