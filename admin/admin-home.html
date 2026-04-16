@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard — KLE Tech CMS</title>
+  <meta name="description" content="Admin dashboard for KLE Tech Complaint Management System. Manage complaints, users, and view analytics.">
+  <script>(function(){ var s=localStorage.getItem('cms-theme')||'light'; document.documentElement.setAttribute('data-theme',s); })();</script>
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    /* ── Admin-specific styles ── */
+    .admin-content { display: grid; grid-template-columns: 1fr 340px; gap: 1.5rem; }
+
+    /* Urgency Breakdown */
+    .urgency-section { margin-bottom: 1.5rem; }
+    .urgency-bars { display: flex; gap: 1rem; }
+    .urgency-card {
+      flex: 1; background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: var(--radius); padding: 1.2rem; box-shadow: var(--shadow);
+      display: flex; align-items: center; gap: 14px; transition: all 0.2s;
+    }
+    .urgency-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+    .urgency-dot {
+      width: 48px; height: 48px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; flex-shrink: 0;
+    }
+    .urgency-dot.high   { background: #fce4ec; }
+    .urgency-dot.medium { background: #fff8e1; }
+    .urgency-dot.low    { background: #e8f5e9; }
+    [data-theme="dark"] .urgency-dot.high   { background: #3d0d12; }
+    [data-theme="dark"] .urgency-dot.medium { background: #3d2800; }
+    [data-theme="dark"] .urgency-dot.low    { background: #0d2e1a; }
+    .urgency-info { flex: 1; }
+    .urgency-label { font-size: 12px; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+    .urgency-count {
+      font-size: 28px; font-family: 'Sora', sans-serif; font-weight: 800; line-height: 1.1;
+    }
+    .urgency-count.high   { color: var(--danger); }
+    .urgency-count.medium { color: var(--warning); }
+    .urgency-count.low    { color: var(--success); }
+    .urgency-bar-track {
+      width: 100%; height: 6px; background: var(--surface-2);
+      border-radius: 3px; margin-top: 6px; overflow: hidden;
+    }
+    .urgency-bar-fill { height: 100%; border-radius: 3px; transition: width 0.6s ease; }
+    .urgency-bar-fill.high   { background: var(--danger);  }
+    .urgency-bar-fill.medium { background: var(--warning); }
+    .urgency-bar-fill.low    { background: var(--success); }
+
+    /* Quick Links */
+    .quick-links { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; margin-bottom: 1.5rem; }
+    .quick-link {
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: var(--radius); padding: 1.2rem; text-align: center;
+      cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow);
+      text-decoration: none; color: var(--text);
+    }
+    .quick-link:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+    .ql-icon { font-size: 28px; margin-bottom: 6px; }
+    .ql-label { font-size: 13px; font-weight: 600; font-family: 'Sora', sans-serif; }
+    .ql-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+    /* Activity Feed Sidebar */
+    .activity-feed-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+    .activity-feed-header {
+      padding: 1rem 1.2rem; border-bottom: 1.5px solid var(--border);
+      font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 700;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .activity-feed-body { padding: 0.5rem 1.2rem; max-height: 480px; overflow-y: auto; }
+    .feed-item {
+      display: flex; gap: 12px; align-items: flex-start;
+      padding: 12px 0; border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+    .feed-item:last-child { border-bottom: none; }
+    .feed-icon {
+      width: 34px; height: 34px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; flex-shrink: 0;
+    }
+    .feed-icon.assigned  { background: #e3f2fd; }
+    .feed-icon.resolved  { background: #e8f5e9; }
+    .feed-icon.new       { background: #fce4ec; }
+    .feed-icon.escalated { background: #fff8e1; }
+    .feed-icon.user      { background: #ede7f6; }
+    [data-theme="dark"] .feed-icon.assigned  { background: #0d2a3d; }
+    [data-theme="dark"] .feed-icon.resolved  { background: #0d2e1a; }
+    [data-theme="dark"] .feed-icon.new       { background: #3d0d12; }
+    [data-theme="dark"] .feed-icon.escalated { background: #3d2800; }
+    [data-theme="dark"] .feed-icon.user      { background: #1a1040; }
+    .feed-text { flex: 1; font-size: 13px; line-height: 1.5; }
+    .feed-text strong { font-weight: 600; }
+    .feed-time { font-size: 11px; color: var(--text-muted); white-space: nowrap; margin-top: 2px; }
+    .feed-complaint-id { font-family: 'Sora', sans-serif; font-size: 11px; font-weight: 700; color: var(--primary); }
+
+    /* Summary bar in stat */
+    .stat-trend { font-size: 11px; margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+    .stat-trend.up   { color: var(--success); }
+    .stat-trend.down { color: var(--danger); }
+
+    @media(max-width:900px) {
+      .admin-content { grid-template-columns: 1fr; }
+      .urgency-bars { flex-direction: column; }
+      .quick-links { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-brand">
+      <div class="logo-box">K</div>
+      <div><span>KLE Tech CMS</span><small>cms.kletech.ac.in</small></div>
+    </div>
+    <div class="nav-links">
+      <a href="admin-home.html" class="active">🏠 Home</a>
+      <a href="admin-pending.html" id="navPending">⏳ Pending</a>
+      <a href="#" id="navHistory">📁 History</a>
+      <a href="#" id="navManageUsers">➕ Manage Users</a>
+    </div>
+    <div class="nav-right">
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌙</button>
+      <div class="nav-user">
+        <span class="role-badge">🛡️ Admin</span>
+        <div class="avatar">AD</div>
+        <div>
+          <div style="font-size:13px;font-weight:600;">Admin Panel</div>
+          <div style="font-size:11px;opacity:0.7;">System Administrator</div>
+        </div>
+        <a href="../login.html" class="nav-logout">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Admin Menu</div>
+        <a href="admin-home.html" class="sidebar-item active"><span class="icon">🏠</span> Dashboard</a>
+        <div class="sidebar-item"><span class="icon">⏳</span> Pending Complaints<span class="sidebar-badge">12</span></div>
+        <div class="sidebar-item"><span class="icon">🔧</span> In Progress<span class="sidebar-badge">8</span></div>
+        <div class="sidebar-item"><span class="icon">📁</span> Resolved History</div>
+        <div class="sidebar-item"><span class="icon">🚨</span> Escalated<span class="sidebar-badge">3</span></div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Management</div>
+        <div class="sidebar-item"><span class="icon">➕</span> Manage Users</div>
+        <div class="sidebar-item"><span class="icon">📊</span> Reports</div>
+        <div class="sidebar-item"><span class="icon">⚙️</span> Settings</div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Urgency Filter</div>
+        <div class="sidebar-item"><span class="icon">🔴</span> High Priority (5)</div>
+        <div class="sidebar-item"><span class="icon">🟡</span> Medium Priority (9)</div>
+        <div class="sidebar-item"><span class="icon">🟢</span> Low Priority (6)</div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <!-- Welcome Banner -->
+      <div class="welcome-banner" style="background: linear-gradient(135deg, #1a237e 0%, #0d47a1 50%, #01579b 100%);">
+        <div>
+          <h2>🛠️ Admin Dashboard — KLE Tech CMS</h2>
+          <p>System overview and complaint management control panel.</p>
+          <div style="margin-top:8px;font-size:12px;opacity:0.8;">📅 Today: April 15, 2025 &nbsp;·&nbsp; 🕐 Last login: 2 hrs ago &nbsp;·&nbsp; 🔔 5 pending actions</div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <a href="#" class="btn btn-accent">⏳ View Pending</a>
+        </div>
+      </div>
+
+      <!-- 5-Column Stats Row -->
+      <div class="stats-grid-5">
+        <div class="stat-card blue">
+          <div class="stat-label">Total Complaints</div>
+          <div class="stat-value">142</div>
+          <div class="stat-sub">All time</div>
+          <div class="stat-trend up">▲ 12% this month</div>
+          <div class="stat-icon">📋</div>
+        </div>
+        <div class="stat-card orange">
+          <div class="stat-label">Pending</div>
+          <div class="stat-value">12</div>
+          <div class="stat-sub">Require action</div>
+          <div class="stat-trend down">▼ 3 from yesterday</div>
+          <div class="stat-icon">⏳</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-label">In Progress</div>
+          <div class="stat-value">8</div>
+          <div class="stat-sub">Being worked on</div>
+          <div class="stat-trend up">▲ Avg 2.1 days</div>
+          <div class="stat-icon">🔧</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-label">Resolved This Month</div>
+          <div class="stat-value">27</div>
+          <div class="stat-sub">April 2025</div>
+          <div class="stat-trend up">▲ 18% vs March</div>
+          <div class="stat-icon">✅</div>
+        </div>
+        <div class="stat-card purple">
+          <div class="stat-label">Total Users</div>
+          <div class="stat-value">384</div>
+          <div class="stat-sub">Students + Faculty</div>
+          <div class="stat-trend up">▲ 6 new this week</div>
+          <div class="stat-icon">👥</div>
+        </div>
+      </div>
+
+      <div class="admin-content">
+        <!-- Left Column -->
+        <div>
+          <!-- Urgency Breakdown -->
+          <div style="font-family:'Sora',sans-serif;font-size:16px;font-weight:700;margin-bottom:1rem;">🎯 Urgency Breakdown</div>
+          <div class="urgency-bars" style="margin-bottom:1.5rem;">
+            <div class="urgency-card">
+              <div class="urgency-dot high">🔴</div>
+              <div class="urgency-info">
+                <div class="urgency-label">High Priority</div>
+                <div class="urgency-count high">5</div>
+                <div class="urgency-bar-track">
+                  <div class="urgency-bar-fill high" style="width:25%"></div>
+                </div>
+              </div>
+            </div>
+            <div class="urgency-card">
+              <div class="urgency-dot medium">🟡</div>
+              <div class="urgency-info">
+                <div class="urgency-label">Medium Priority</div>
+                <div class="urgency-count medium">9</div>
+                <div class="urgency-bar-track">
+                  <div class="urgency-bar-fill medium" style="width:45%"></div>
+                </div>
+              </div>
+            </div>
+            <div class="urgency-card">
+              <div class="urgency-dot low">🟢</div>
+              <div class="urgency-info">
+                <div class="urgency-label">Low Priority</div>
+                <div class="urgency-count low">6</div>
+                <div class="urgency-bar-track">
+                  <div class="urgency-bar-fill low" style="width:30%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Links -->
+          <div style="font-family:'Sora',sans-serif;font-size:16px;font-weight:700;margin-bottom:1rem;">⚡ Quick Links</div>
+          <div class="quick-links">
+            <a href="admin-pending.html" class="quick-link" id="qlPending">
+              <div class="ql-icon">⏳</div>
+              <div class="ql-label">View Pending Complaints</div>
+              <div class="ql-sub">12 complaints awaiting review</div>
+            </a>
+            <a href="admin-history.html" class="quick-link" id="qlHistory">
+              <div class="ql-icon">📁</div>
+              <div class="ql-label">View Resolved History</div>
+              <div class="ql-sub">95 resolved this semester</div>
+            </a>
+            <a href="admin-manage-users.html" class="quick-link" id="qlCreateUser">
+              <div class="ql-icon">➕</div>
+              <div class="ql-label">Create New User</div>
+              <div class="ql-sub">Add student or faculty</div>
+            </a>
+          </div>
+
+          <!-- Recent Complaints Table -->
+          <div class="card">
+            <div class="card-header">
+              <h3>📋 Latest Complaints</h3>
+              <a href="#" class="btn btn-outline btn-sm">View All →</a>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Filed By</th>
+                    <th>Category</th>
+                    <th>Subject</th>
+                    <th>🔥 Urgency</th>
+                    <th>⏳ Status</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><span class="complaint-id">#CMS-2025-042</span></td>
+                    <td>Dron G K.</td>
+                    <td>🍽️ Canteen</td>
+                    <td>Food quality poor in Block-B</td>
+                    <td><span class="badge badge-high">🔥 High</span></td>
+                    <td><span class="badge badge-progress">🔧 In Progress</span></td>
+                    <td>Apr 14</td>
+                    <td><a href="#" class="btn btn-sm btn-outline">Assign →</a></td>
+                  </tr>
+                  <tr>
+                    <td><span class="complaint-id">#CMS-2025-041</span></td>
+                    <td>Sneha P.</td>
+                    <td>💻 IT / WiFi</td>
+                    <td>WiFi not working in Lab 3</td>
+                    <td><span class="badge badge-medium">⚡ Medium</span></td>
+                    <td><span class="badge badge-pending">⏳ Pending</span></td>
+                    <td>Apr 13</td>
+                    <td><a href="#" class="btn btn-sm btn-primary">Assign →</a></td>
+                  </tr>
+                  <tr>
+                    <td><span class="complaint-id">#CMS-2025-040</span></td>
+                    <td>Dr. Ramesh</td>
+                    <td>🔧 Infra</td>
+                    <td>Projector malfunction Room 301</td>
+                    <td><span class="badge badge-high">🔥 High</span></td>
+                    <td><span class="badge badge-pending">⏳ Pending</span></td>
+                    <td>Apr 13</td>
+                    <td><a href="#" class="btn btn-sm btn-primary">Assign →</a></td>
+                  </tr>
+                  <tr>
+                    <td><span class="complaint-id">#CMS-2025-039</span></td>
+                    <td>Arjun M.</td>
+                    <td>🏠 Hostel</td>
+                    <td>Water supply disruption Block C</td>
+                    <td><span class="badge badge-high">🔥 High</span></td>
+                    <td><span class="badge badge-resolved">✅ Resolved</span></td>
+                    <td>Apr 12</td>
+                    <td><a href="#" class="btn btn-sm btn-ghost">View →</a></td>
+                  </tr>
+                  <tr>
+                    <td><span class="complaint-id">#CMS-2025-038</span></td>
+                    <td>Priya S.</td>
+                    <td>📚 Academic</td>
+                    <td>Attendance not updated for DS</td>
+                    <td><span class="badge badge-low">📋 Low</span></td>
+                    <td><span class="badge badge-resolved">✅ Resolved</span></td>
+                    <td>Apr 11</td>
+                    <td><a href="#" class="btn btn-sm btn-ghost">View →</a></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Sidebar — Activity Feed -->
+        <div>
+          <div class="activity-feed-card">
+            <div class="activity-feed-header">📡 Recent Activity</div>
+            <div class="activity-feed-body">
+              <div class="feed-item">
+                <div class="feed-icon assigned">🔧</div>
+                <div>
+                  <div class="feed-text">
+                    <span class="feed-complaint-id">CMS-2025-0042</span> assigned to <strong>Ramesh K</strong>
+                  </div>
+                  <div class="feed-time">2 hrs ago</div>
+                </div>
+              </div>
+              <div class="feed-item">
+                <div class="feed-icon resolved">✅</div>
+                <div>
+                  <div class="feed-text">
+                    <span class="feed-complaint-id">CMS-2025-0039</span> resolved ✅
+                  </div>
+                  <div class="feed-time">5 hrs ago</div>
+                </div>
+              </div>
+              <div class="feed-item">
+                <div class="feed-icon new">🔴</div>
+                <div>
+                  <div class="feed-text">
+                    New complaint filed <span class="badge badge-high" style="font-size:10px;padding:2px 7px;">🔥 High</span>
+                  </div>
+                  <div class="feed-time">1 hr ago</div>
+                </div>
+              </div>
+              <div class="feed-item">
+                <div class="feed-icon escalated">🚨</div>
+                <div>
+                  <div class="feed-text">
+                    <span class="feed-complaint-id">CMS-2025-0031</span> <strong>escalated</strong> to HOD
+                  </div>
+                  <div class="feed-time">6 hrs ago</div>
+                </div>
+              </div>
+              <div class="feed-item">
+                <div class="feed-icon user">👤</div>
+                <div>
+                  <div class="feed-text">
+                    New user registered: <strong>Priya Sharma</strong> (Student, ECE)
+                  </div>
+                  <div class="feed-time">8 hrs ago</div>
+                </div>
+              </div>
+              <div class="feed-item">
+                <div class="feed-icon resolved">✅</div>
+                <div>
+                  <div class="feed-text">
+                    <span class="feed-complaint-id">CMS-2025-0035</span> marked as resolved by <strong>Maintenance</strong>
+                  </div>
+                  <div class="feed-time">12 hrs ago</div>
+                </div>
+              </div>
+              <div class="feed-item">
+                <div class="feed-icon assigned">🔧</div>
+                <div>
+                  <div class="feed-text">
+                    <span class="feed-complaint-id">CMS-2025-0041</span> re-assigned to <strong>IT Dept</strong>
+                  </div>
+                  <div class="feed-time">1 day ago</div>
+                </div>
+              </div>
+              <div class="feed-item">
+                <div class="feed-icon new">🔴</div>
+                <div>
+                  <div class="feed-text">
+                    3 new complaints filed by <strong>CSE students</strong>
+                  </div>
+                  <div class="feed-time">1 day ago</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Admin System Status Mini Card -->
+          <div class="card mt-2">
+            <div class="card-body" style="text-align:center;">
+              <div style="font-size:32px;margin-bottom:8px;">🟢</div>
+              <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:14px;margin-bottom:4px;">System Status: Online</div>
+              <div style="font-size:12px;color:var(--text-muted);">All services running normally</div>
+              <div style="font-size:11px;color:var(--text-muted);margin-top:8px;">Uptime: 99.9% · Last backup: 2 hrs ago</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert alert-warning mt-2">
+        ⚠️ <strong>Attention:</strong> 3 complaints have been escalated to HOD due to exceeding the 5-day resolution SLA. Review them under the Escalated tab.
+      </div>
+    </main>
+  </div>
+
+  <footer><strong>KLE Technological University CMS</strong> — Web Technologies &amp; SE Project — 2025</footer>
+  <script>
+    function toggleTheme() {
+      var html = document.documentElement;
+      var next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('cms-theme', next);
+      document.getElementById('themeToggle').textContent = next === 'dark' ? '☀️' : '🌙';
+    }
+    document.getElementById('themeToggle').textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+
+    // Animate urgency bars on load
+    window.addEventListener('load', function() {
+      document.querySelectorAll('.urgency-bar-fill').forEach(function(bar) {
+        var w = bar.style.width;
+        bar.style.width = '0';
+        setTimeout(function() { bar.style.width = w; }, 200);
+      });
+    });
+  </script>
+</body>
+</html>

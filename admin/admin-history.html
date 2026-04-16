@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resolved History — KLE Tech CMS Admin</title>
+  <script>(function(){ var s=localStorage.getItem('cms-theme')||'light'; document.documentElement.setAttribute('data-theme',s); })();</script>
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    .filter-bar { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 1rem 1.5rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; box-shadow: var(--shadow); }
+    .search-wrap { flex: 1; position: relative; min-width: 180px; }
+    .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 15px; }
+    tr.resolved-row td { background: rgba(0,137,123,0.04); }
+    tr.resolved-row:hover td { background: rgba(0,137,123,0.09); }
+    [data-theme="dark"] tr.resolved-row td { background: rgba(0,137,123,0.07); }
+    [data-theme="dark"] tr.resolved-row:hover td { background: rgba(0,137,123,0.14); }
+    .resolution-note { font-size: 12px; color: var(--text-muted); max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .stats-history { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin-bottom: 1.5rem; }
+    .mini-stat { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 1.2rem; box-shadow: var(--shadow); display: flex; align-items: center; gap: 14px; }
+    .mini-stat-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+    .mini-stat-icon.green { background: #e8f5e9; }
+    .mini-stat-icon.blue { background: #e3f2fd; }
+    .mini-stat-icon.purple { background: #ede7f6; }
+    .mini-stat-icon.orange { background: #fff3e0; }
+    [data-theme="dark"] .mini-stat-icon.green { background: #0d2e1a; }
+    [data-theme="dark"] .mini-stat-icon.blue { background: #0d2a3d; }
+    [data-theme="dark"] .mini-stat-icon.purple { background: #1a1040; }
+    [data-theme="dark"] .mini-stat-icon.orange { background: #3d2800; }
+    .mini-stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); font-weight: 500; font-family: 'Sora', sans-serif; }
+    .mini-stat-value { font-size: 26px; font-weight: 800; font-family: 'Sora', sans-serif; line-height: 1.1; }
+    .mini-stat-value.green { color: var(--success); }
+    .mini-stat-value.blue { color: var(--primary); }
+    .mini-stat-value.purple { color: #7b1fa2; }
+    .mini-stat-value.orange { color: var(--warning); }
+    .export-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+    .export-bar h3 { font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 700; }
+    .export-actions { display: flex; gap: 8px; }
+    @media(max-width:900px) { .stats-history { grid-template-columns: 1fr 1fr; } }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-brand">
+      <div class="logo-box">K</div>
+      <div><span>KLE Tech CMS</span><small>cms.kletech.ac.in</small></div>
+    </div>
+    <div class="nav-links">
+      <a href="admin-home.html">🏠 Home</a>
+      <a href="admin-pending.html">⏳ Pending</a>
+      <a href="admin-history.html" class="active">📁 History</a>
+      <a href="admin-manage-users.html">➕ Manage Users</a>
+    </div>
+    <div class="nav-right">
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌙</button>
+      <div class="nav-user">
+        <span class="role-badge">🛡️ Admin</span>
+        <div class="avatar" style="background:var(--accent);color:#fff;">KM</div>
+        <div><div style="font-size:13px;font-weight:600;">Kavitha Murthy</div><div style="font-size:11px;opacity:0.7;">System Administrator</div></div>
+        <a href="../login.html" class="nav-logout">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Admin Panel</div>
+        <a href="admin-home.html" class="sidebar-item"><span class="icon">🏠</span> Dashboard</a>
+        <a href="admin-pending.html" class="sidebar-item"><span class="icon">⏳</span> Pending Complaints<span class="sidebar-badge">8</span></a>
+        <a href="admin-history.html" class="sidebar-item active"><span class="icon">📁</span> Resolved History</a>
+        <a href="admin-manage-users.html" class="sidebar-item"><span class="icon">👥</span> Manage Users</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Filter by Category</div>
+        <div class="sidebar-item" onclick="filterCategory('all')"><span class="icon">📋</span> All Categories</div>
+        <div class="sidebar-item" onclick="filterCategory('canteen')"><span class="icon">🍽️</span> Canteen</div>
+        <div class="sidebar-item" onclick="filterCategory('hostel')"><span class="icon">🏠</span> Hostel</div>
+        <div class="sidebar-item" onclick="filterCategory('it')"><span class="icon">💻</span> IT / WiFi</div>
+        <div class="sidebar-item" onclick="filterCategory('electrical')"><span class="icon">🔌</span> Electrical</div>
+        <div class="sidebar-item" onclick="filterCategory('infra')"><span class="icon">🔧</span> Infrastructure</div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="page-header">
+        <div class="breadcrumb">Admin › <span>Resolved Complaints History</span></div>
+        <h1>📁 Resolved Complaints — History</h1>
+        <p>All resolved complaints across this semester. Browse, filter, and export records.</p>
+      </div>
+
+      <!-- Mini Stats -->
+      <div class="stats-history">
+        <div class="mini-stat">
+          <div class="mini-stat-icon green">✅</div>
+          <div>
+            <div class="mini-stat-label">Total Resolved</div>
+            <div class="mini-stat-value green">95</div>
+          </div>
+        </div>
+        <div class="mini-stat">
+          <div class="mini-stat-icon blue">📅</div>
+          <div>
+            <div class="mini-stat-label">This Month</div>
+            <div class="mini-stat-value blue">27</div>
+          </div>
+        </div>
+        <div class="mini-stat">
+          <div class="mini-stat-icon orange">⏱️</div>
+          <div>
+            <div class="mini-stat-label">Avg Resolution</div>
+            <div class="mini-stat-value orange" style="font-size:20px;">2.4d</div>
+          </div>
+        </div>
+        <div class="mini-stat">
+          <div class="mini-stat-icon purple">👷</div>
+          <div>
+            <div class="mini-stat-label">Active Workers</div>
+            <div class="mini-stat-value purple">12</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter Bar -->
+      <div class="filter-bar">
+        <div class="chips">
+          <span class="chip active" onclick="chipClick(this)">All (95)</span>
+          <span class="chip" onclick="chipClick(this)">April</span>
+          <span class="chip" onclick="chipClick(this)">March</span>
+          <span class="chip" onclick="chipClick(this)">February</span>
+        </div>
+        <div style="width:1px;height:24px;background:var(--border);"></div>
+        <input type="date" class="form-control" style="width:145px;" value="2025-03-01">
+        <span style="font-size:13px;color:var(--text-muted);">to</span>
+        <input type="date" class="form-control" style="width:145px;" value="2025-04-15">
+        <select class="form-control" style="width:155px;">
+          <option>All Categories</option>
+          <option>🍽️ Canteen</option>
+          <option>🏠 Hostel</option>
+          <option>💻 IT/WiFi</option>
+          <option>🔌 Electrical</option>
+          <option>🔧 Infra</option>
+        </select>
+        <select class="form-control" style="width:155px;">
+          <option>All Workers</option>
+          <option>Ramesh Kumar</option>
+          <option>Suresh Patil</option>
+          <option>Anand Hegde</option>
+          <option>Manjunath B</option>
+        </select>
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="form-control" placeholder="Search resolved…" style="padding-left:36px;" oninput="liveSearch(this.value)">
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="card">
+        <div style="padding:1.2rem 1.5rem;border-bottom:1.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+          <h3 style="font-family:'Sora',sans-serif;font-size:16px;font-weight:700;">✅ Resolved Complaints</h3>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-outline btn-sm">📥 Export CSV</button>
+            <button class="btn btn-outline btn-sm">🖨️ Print</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table id="historyTable">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Category</th>
+                <th>Urgency</th>
+                <th>Submitted By</th>
+                <th>Assigned Worker</th>
+                <th>Resolved Date</th>
+                <th>Avg Days</th>
+                <th>Resolution Notes</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="resolved-row">
+                <td><span class="complaint-id">#CMS-2025-039</span></td>
+                <td>🏠 Hostel</td>
+                <td><span class="badge badge-high">🔥 High</span></td>
+                <td>Arjun M. <span style="font-size:11px;color:var(--text-muted);">(Student)</span></td>
+                <td>👷 Suresh Patil</td>
+                <td>Apr 13, 2025</td>
+                <td><span style="color:var(--success);font-weight:600;">1d</span></td>
+                <td><span class="resolution-note">Water supply restored in Block C after pipeline fix.</span></td>
+                <td><a href="#" class="btn btn-sm btn-ghost">View →</a></td>
+              </tr>
+              <tr class="resolved-row">
+                <td><span class="complaint-id">#CMS-2025-038</span></td>
+                <td>📚 Academic</td>
+                <td><span class="badge badge-low">📋 Low</span></td>
+                <td>Priya S. <span style="font-size:11px;color:var(--text-muted);">(Student)</span></td>
+                <td>👷 Admin — Faculty</td>
+                <td>Apr 12, 2025</td>
+                <td><span style="color:var(--success);font-weight:600;">2d</span></td>
+                <td><span class="resolution-note">Attendance updated by concerned faculty.</span></td>
+                <td><a href="#" class="btn btn-sm btn-ghost">View →</a></td>
+              </tr>
+              <tr class="resolved-row">
+                <td><span class="complaint-id">#CMS-2025-035</span></td>
+                <td>💻 IT/WiFi</td>
+                <td><span class="badge badge-medium">⚡ Medium</span></td>
+                <td>Rahul K. <span style="font-size:11px;color:var(--text-muted);">(Student)</span></td>
+                <td>👷 IT Team</td>
+                <td>Apr 10, 2025</td>
+                <td><span style="color:var(--warning);font-weight:600;">3d</span></td>
+                <td><span class="resolution-note">Router replaced in Lab 2. WiFi restored.</span></td>
+                <td><a href="#" class="btn btn-sm btn-ghost">View →</a></td>
+              </tr>
+              <tr class="resolved-row">
+                <td><span class="complaint-id">#CMS-2025-031</span></td>
+                <td>🔌 Electrical</td>
+                <td><span class="badge badge-high">🔥 High</span></td>
+                <td>Dr. Meena R. <span style="font-size:11px;color:var(--text-muted);">(Faculty)</span></td>
+                <td>👷 Ramesh Kumar</td>
+                <td>Apr 8, 2025</td>
+                <td><span style="color:var(--success);font-weight:600;">1d</span></td>
+                <td><span class="resolution-note">MCB replaced in Room 204. Power restored.</span></td>
+                <td><a href="#" class="btn btn-sm btn-ghost">View →</a></td>
+              </tr>
+              <tr class="resolved-row">
+                <td><span class="complaint-id">#CMS-2025-028</span></td>
+                <td>🍽️ Canteen</td>
+                <td><span class="badge badge-medium">⚡ Medium</span></td>
+                <td>Vikram N. <span style="font-size:11px;color:var(--text-muted);">(Student)</span></td>
+                <td>👷 Anand Hegde</td>
+                <td>Apr 5, 2025</td>
+                <td><span style="color:var(--warning);font-weight:600;">4d</span></td>
+                <td><span class="resolution-note">Menu updated. Hygiene inspection done.</span></td>
+                <td><a href="#" class="btn btn-sm btn-ghost">View →</a></td>
+              </tr>
+              <tr class="resolved-row">
+                <td><span class="complaint-id">#CMS-2025-025</span></td>
+                <td>🚿 Sanitation</td>
+                <td><span class="badge badge-medium">⚡ Medium</span></td>
+                <td>Sneha P. <span style="font-size:11px;color:var(--text-muted);">(Student)</span></td>
+                <td>👷 Suresh Patil</td>
+                <td>Apr 3, 2025</td>
+                <td><span style="color:var(--success);font-weight:600;">2d</span></td>
+                <td><span class="resolution-note">Washroom drain cleared. Tiles cleaned.</span></td>
+                <td><a href="#" class="btn btn-sm btn-ghost">View →</a></td>
+              </tr>
+              <tr class="resolved-row">
+                <td><span class="complaint-id">#CMS-2025-020</span></td>
+                <td>🔧 Infrastructure</td>
+                <td><span class="badge badge-low">📋 Low</span></td>
+                <td>Amogh S. <span style="font-size:11px;color:var(--text-muted);">(Student)</span></td>
+                <td>👷 Manjunath B</td>
+                <td>Mar 28, 2025</td>
+                <td><span style="color:var(--danger);font-weight:600;">6d</span></td>
+                <td><span class="resolution-note">Broken bench replaced in Room 105.</span></td>
+                <td><a href="#" class="btn btn-sm btn-ghost">View →</a></td>
+              </tr>
+              <tr class="resolved-row">
+                <td><span class="complaint-id">#CMS-2025-018</span></td>
+                <td>🏠 Hostel</td>
+                <td><span class="badge badge-high">🔥 High</span></td>
+                <td>Kiran J. <span style="font-size:11px;color:var(--text-muted);">(Student)</span></td>
+                <td>👷 Suresh Patil</td>
+                <td>Mar 25, 2025</td>
+                <td><span style="color:var(--success);font-weight:600;">1d</span></td>
+                <td><span class="resolution-note">Leaking overhead tank fixed. Block A.</span></td>
+                <td><a href="#" class="btn btn-sm btn-ghost">View →</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <!-- Pagination -->
+        <div style="padding:1rem 1.5rem;border-top:1.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:13px;color:var(--text-muted);">Showing 8 of 95 resolved complaints</span>
+          <div style="display:flex;gap:6px;">
+            <button class="btn btn-ghost btn-sm">← Prev</button>
+            <button class="btn btn-primary btn-sm">1</button>
+            <button class="btn btn-ghost btn-sm">2</button>
+            <button class="btn btn-ghost btn-sm">3</button>
+            <button class="btn btn-ghost btn-sm">Next →</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <footer><strong>KLE Technological University CMS</strong> — Web Technologies &amp; SE Project — 2025</footer>
+  <script>
+    function chipClick(el) { document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active')); el.classList.add('active'); }
+    function liveSearch(val) {
+      val = val.toLowerCase();
+      document.querySelectorAll('#historyTable tbody tr').forEach(function(tr) {
+        tr.style.display = tr.textContent.toLowerCase().includes(val) ? '' : 'none';
+      });
+    }
+    function filterCategory(cat) { /* UI filter stub */ }
+    function toggleTheme() {
+      var html = document.documentElement;
+      var next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('cms-theme', next);
+      document.getElementById('themeToggle').textContent = next === 'dark' ? '☀️' : '🌙';
+    }
+    document.getElementById('themeToggle').textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+  </script>
+</body>
+</html>

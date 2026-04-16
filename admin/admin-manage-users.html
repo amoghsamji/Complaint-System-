@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Users — KLE Tech CMS Admin</title>
+  <script>(function(){ var s=localStorage.getItem('cms-theme')||'light'; document.documentElement.setAttribute('data-theme',s); })();</script>
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    .tab-nav { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 1.5rem; }
+    .tab-btn { padding: 12px 24px; font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; border: none; background: none; color: var(--text-muted); border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.2s; }
+    .tab-btn:hover { color: var(--text); background: var(--surface-2); }
+    .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); background: var(--primary-soft); }
+    [data-theme="dark"] .tab-btn.active { background: #1e2456; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Status badge */
+    .status-active { background: #e8f5e9; color: var(--success); padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; font-family: 'Sora', sans-serif; }
+    .status-inactive { background: #fce4ec; color: var(--danger); padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; font-family: 'Sora', sans-serif; }
+    [data-theme="dark"] .status-active { background: #0d2e1a; }
+    [data-theme="dark"] .status-inactive { background: #3d0d12; }
+    .user-avatar-cell { display: flex; align-items: center; gap: 10px; }
+    .user-mini-avatar { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-family: 'Sora', sans-serif; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+    .user-mini-avatar.student { background: var(--primary-soft); color: var(--primary); }
+    .user-mini-avatar.faculty { background: #fff3e0; color: var(--warning); }
+    .user-mini-avatar.worker { background: #e8f5e9; color: var(--success); }
+    [data-theme="dark"] .user-mini-avatar.student { background: #1e2456; }
+    [data-theme="dark"] .user-mini-avatar.faculty { background: #3d2800; }
+    [data-theme="dark"] .user-mini-avatar.worker { background: #0d2e1a; }
+    .action-cell { display: flex; gap: 6px; align-items: center; }
+
+    /* Modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 200; display: none; align-items: flex-start; justify-content: center; padding-top: 60px; overflow-y: auto; }
+    .modal-overlay.visible { display: flex; }
+    .modal-box { background: var(--surface); border-radius: var(--radius); width: 520px; max-width: 95vw; box-shadow: var(--shadow-lg); border: 1.5px solid var(--border); margin-bottom: 60px; }
+    .modal-header { padding: 1.5rem; border-bottom: 1.5px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .modal-header h3 { font-family: 'Sora', sans-serif; font-size: 18px; }
+    .modal-close { background: var(--surface-2); border: 1.5px solid var(--border); border-radius: 8px; width: 32px; height: 32px; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; }
+    .modal-close:hover { background: var(--border); }
+    .modal-body { padding: 1.5rem; }
+    .modal-footer { padding: 1.2rem 1.5rem; border-top: 1.5px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; background: var(--surface-2); border-radius: 0 0 var(--radius) var(--radius); }
+    .password-group { position: relative; }
+    .password-group input { padding-right: 100px; }
+    .gen-pass-btn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 11px; font-weight: 700; color: var(--primary); cursor: pointer; font-family: 'Sora', sans-serif; background: var(--primary-soft); border: none; padding: 4px 8px; border-radius: 6px; }
+
+    .filter-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .search-wrap { flex: 1; position: relative; min-width: 180px; }
+    .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 15px; }
+    .user-count-badge { background: var(--surface-2); border: 1.5px solid var(--border); border-radius: 20px; padding: 5px 14px; font-family: 'Sora', sans-serif; font-size: 12px; font-weight: 700; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-brand">
+      <div class="logo-box">K</div>
+      <div><span>KLE Tech CMS</span><small>cms.kletech.ac.in</small></div>
+    </div>
+    <div class="nav-links">
+      <a href="admin-home.html">🏠 Home</a>
+      <a href="admin-pending.html">⏳ Pending</a>
+      <a href="admin-history.html">📁 History</a>
+      <a href="admin-manage-users.html" class="active">➕ Manage Users</a>
+    </div>
+    <div class="nav-right">
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌙</button>
+      <div class="nav-user">
+        <span class="role-badge">🛡️ Admin</span>
+        <div class="avatar" style="background:var(--accent);color:#fff;">KM</div>
+        <div><div style="font-size:13px;font-weight:600;">Kavitha Murthy</div><div style="font-size:11px;opacity:0.7;">System Administrator</div></div>
+        <a href="../login.html" class="nav-logout">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Admin Panel</div>
+        <a href="admin-home.html" class="sidebar-item"><span class="icon">🏠</span> Dashboard</a>
+        <a href="admin-pending.html" class="sidebar-item"><span class="icon">⏳</span> Pending Complaints<span class="sidebar-badge">8</span></a>
+        <a href="admin-history.html" class="sidebar-item"><span class="icon">📁</span> Resolved History</a>
+        <a href="admin-manage-users.html" class="sidebar-item active"><span class="icon">👥</span> Manage Users</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">User Stats</div>
+        <div class="sidebar-item"><span class="icon">👨‍🎓</span> Students <span class="sidebar-badge">312</span></div>
+        <div class="sidebar-item"><span class="icon">👨‍🏫</span> Faculty <span class="sidebar-badge">58</span></div>
+        <div class="sidebar-item"><span class="icon">👷</span> Workers <span class="sidebar-badge">14</span></div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+        <div>
+          <div class="breadcrumb">Admin › <span>Manage Users</span></div>
+          <h1>👥 Manage Users</h1>
+          <p>View, edit, deactivate, or create student, faculty, and worker accounts.</p>
+        </div>
+        <button class="btn btn-primary" onclick="openModal()">➕ Create New User</button>
+      </div>
+
+      <div class="alert alert-warning">
+        🔒 <strong>Note:</strong> Students and Faculty cannot self-register. Only admins can create and manage user accounts.
+      </div>
+
+      <!-- Tabs -->
+      <div class="tab-nav">
+        <button class="tab-btn active" onclick="switchTab('students',this)">👨‍🎓 Students <span style="font-size:11px;opacity:0.7;">(312)</span></button>
+        <button class="tab-btn" onclick="switchTab('faculty',this)">👨‍🏫 Faculty <span style="font-size:11px;opacity:0.7;">(58)</span></button>
+        <button class="tab-btn" onclick="switchTab('workers',this)">👷 Workers <span style="font-size:11px;opacity:0.7;">(14)</span></button>
+      </div>
+
+      <!-- STUDENTS TAB -->
+      <div class="tab-content active" id="tab-students">
+        <div class="filter-row">
+          <div class="search-wrap">
+            <span class="search-icon">🔍</span>
+            <input type="text" class="form-control" placeholder="Search students…" style="padding-left:36px;" oninput="tableSearch(this,'studentsTable')">
+          </div>
+          <select class="form-control" style="width:160px;">
+            <option>All Departments</option>
+            <option>CSE</option>
+            <option>ECE</option>
+            <option>ME</option>
+            <option>Civil</option>
+          </select>
+          <select class="form-control" style="width:130px;">
+            <option>All Status</option>
+            <option>Active</option>
+            <option>Inactive</option>
+          </select>
+          <span class="user-count-badge">312 students</span>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table id="studentsTable">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>USN</th>
+                  <th>Email</th>
+                  <th>Department</th>
+                  <th>Role</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><div class="user-avatar-cell"><div class="user-mini-avatar student">DK</div><span style="font-weight:600;">Dron G Kambali</span></div></td>
+                  <td><span class="complaint-id">01FE21BCS045</span></td>
+                  <td>dron@kletech.ac.in</td>
+                  <td>CSE</td>
+                  <td><span class="badge badge-progress">Student</span></td>
+                  <td><span class="status-active">● Active</span></td>
+                  <td><div class="action-cell"><button class="btn btn-sm btn-outline">✏️ Edit</button><button class="btn btn-sm btn-ghost">🚫 Deactivate</button></div></td>
+                </tr>
+                <tr>
+                  <td><div class="user-avatar-cell"><div class="user-mini-avatar student">RS</div><span style="font-weight:600;">Riya Sharma</span></div></td>
+                  <td><span class="complaint-id">01FE22BEC012</span></td>
+                  <td>riya.s@kletech.ac.in</td>
+                  <td>ECE</td>
+                  <td><span class="badge badge-progress">Student</span></td>
+                  <td><span class="status-active">● Active</span></td>
+                  <td><div class="action-cell"><button class="btn btn-sm btn-outline">✏️ Edit</button><button class="btn btn-sm btn-ghost">🚫 Deactivate</button></div></td>
+                </tr>
+                <tr>
+                  <td><div class="user-avatar-cell"><div class="user-mini-avatar student">AS</div><span style="font-weight:600;">Amogh Samji</span></div></td>
+                  <td><span class="complaint-id">01FE21BME099</span></td>
+                  <td>amogh.s@kletech.ac.in</td>
+                  <td>ME</td>
+                  <td><span class="badge badge-progress">Student</span></td>
+                  <td><span class="status-active">● Active</span></td>
+                  <td><div class="action-cell"><button class="btn btn-sm btn-outline">✏️ Edit</button><button class="btn btn-sm btn-ghost">🚫 Deactivate</button></div></td>
+                </tr>
+                <tr>
+                  <td><div class="user-avatar-cell"><div class="user-mini-avatar student">PI</div><span style="font-weight:600;">Pramod Indi</span></div></td>
+                  <td><span class="complaint-id">01FE23BCS111</span></td>
+                  <td>pramod.i@kletech.ac.in</td>
+                  <td>CSE</td>
+                  <td><span class="badge badge-progress">Student</span></td>
+                  <td><span class="status-inactive">● Inactive</span></td>
+                  <td><div class="action-cell"><button class="btn btn-sm btn-outline">✏️ Edit</button><button class="btn btn-sm btn-success btn-sm">✅ Activate</button></div></td>
+                </tr>
+                <tr>
+                  <td><div class="user-avatar-cell"><div class="user-mini-avatar student">CS</div><span style="font-weight:600;">Chinmay Sabarad</span></div></td>
+                  <td><span class="complaint-id">01FE22BCV031</span></td>
+                  <td>chinmay.s@kletech.ac.in</td>
+                  <td>Civil</td>
+                  <td><span class="badge badge-progress">Student</span></td>
+                  <td><span class="status-active">● Active</span></td>
+                  <td><div class="action-cell"><button class="btn btn-sm btn-outline">✏️ Edit</button><button class="btn btn-sm btn-ghost">🚫 Deactivate</button></div></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div style="padding:1rem 1.5rem;border-top:1.5px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:13px;color:var(--text-muted);">Showing 5 of 312 students</span>
+            <div style="display:flex;gap:6px;">
+              <button class="btn btn-ghost btn-sm">← Prev</button>
+              <button class="btn btn-primary btn-sm">1</button>
+              <button class="btn btn-ghost btn-sm">2</button>
+              <button class="btn btn-ghost btn-sm">Next →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FACULTY TAB -->
+      <div class="tab-content" id="tab-faculty">
+        <div class="filter-row">
+          <div class="search-wrap">
+            <span class="search-icon">🔍</span>
+            <input type="text" class="form-control" placeholder="Search faculty…" style="padding-left:36px;" oninput="tableSearch(this,'facultyTable')">
+          </div>
+          <select class="form-control" style="width:160px;"><option>All Departments</option><option>CSE</option><option>ECE</option></select>
+          <span class="user-count-badge">58 faculty</span>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table id="facultyTable">
+              <thead>
+                <tr><th>Name</th><th>Staff ID</th><th>Email</th><th>Department</th><th>Role</th><th>Status</th><th>Actions</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><div class="user-avatar-cell"><div class="user-mini-avatar faculty">PS</div><span style="font-weight:600;">Dr. Priya Sharma</span></div></td>
+                  <td><span class="complaint-id">FAC-CSE-014</span></td>
+                  <td>priya.s@kletech.ac.in</td>
+                  <td>CSE</td>
+                  <td><span class="badge badge-medium">Faculty</span></td>
+                  <td><span class="status-active">● Active</span></td>
+                  <td><div class="action-cell"><button class="btn btn-sm btn-outline">✏️ Edit</button><button class="btn btn-sm btn-ghost">🚫 Deactivate</button></div></td>
+                </tr>
+                <tr>
+                  <td><div class="user-avatar-cell"><div class="user-mini-avatar faculty">RK</div><span style="font-weight:600;">Prof. Ramesh Kulkarni</span></div></td>
+                  <td><span class="complaint-id">FAC-ECE-007</span></td>
+                  <td>ramesh.k@kletech.ac.in</td>
+                  <td>ECE</td>
+                  <td><span class="badge badge-medium">Faculty</span></td>
+                  <td><span class="status-active">● Active</span></td>
+                  <td><div class="action-cell"><button class="btn btn-sm btn-outline">✏️ Edit</button><button class="btn btn-sm btn-ghost">🚫 Deactivate</button></div></td>
+                </tr>
+                <tr>
+                  <td><div class="user-avatar-cell"><div class="user-mini-avatar faculty">MN</div><span style="font-weight:600;">Dr. Meena Nair</span></div></td>
+                  <td><span class="complaint-id">FAC-ME-003</span></td>
+                  <td>meena.n@kletech.ac.in</td>
+                  <td>ME</td>
+                  <td><span class="badge badge-medium">Faculty</span></td>
+                  <td><span class="status-inactive">● Inactive</span></td>
+                  <td><div class="action-cell"><button class="btn btn-sm btn-outline">✏️ Edit</button><button class="btn btn-sm btn-success btn-sm">✅ Activate</button></div></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- WORKERS TAB -->
+      <div class="tab-content" id="tab-workers">
+        <div class="filter-row">
+          <div class="search-wrap">
+            <span class="search-icon">🔍</span>
+            <input type="text" class="form-control" placeholder="Search workers…" style="padding-left:36px;" oninput="tableSearch(this,'workersTable')">
+          </div>
+          <span class="user-count-badge">14 workers</span>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table id="workersTable">
+              <thead>
+                <tr><th>Name</th><th>Worker ID</th><th>Email / Phone</th><th>Department</th><th>Role</th><th>Status</th><th>Actions</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><div class="user-avatar-cell"><div class="user-mini-avatar worker">RK</div><span style="font-weight:600;">Ramesh Kumar</span></div></td>
+                  <td><span class="complaint-id">WRK-ELE-001</span></td>
+                  <td>98765XXXXX</td>
+                  <td>Electrical</td>
+                  <td><span class="badge badge-low">Worker</span></td>
+                  <td><span class="status-active">● Active</span></td>
+                  <td><div class="action-cell"><button class="btn btn-sm btn-outline">✏️ Edit</button><button class="btn btn-sm btn-ghost">🚫 Deactivate</button></div></td>
+                </tr>
+                <tr>
+                  <td><div class="user-avatar-cell"><div class="user-mini-avatar worker">SP</div><span style="font-weight:600;">Suresh Patil</span></div></td>
+                  <td><span class="complaint-id">WRK-PLB-002</span></td>
+                  <td>97654XXXXX</td>
+                  <td>Plumbing</td>
+                  <td><span class="badge badge-low">Worker</span></td>
+                  <td><span class="status-active">● Active</span></td>
+                  <td><div class="action-cell"><button class="btn btn-sm btn-outline">✏️ Edit</button><button class="btn btn-sm btn-ghost">🚫 Deactivate</button></div></td>
+                </tr>
+                <tr>
+                  <td><div class="user-avatar-cell"><div class="user-mini-avatar worker">AH</div><span style="font-weight:600;">Anand Hegde</span></div></td>
+                  <td><span class="complaint-id">WRK-CAN-003</span></td>
+                  <td>96543XXXXX</td>
+                  <td>Canteen</td>
+                  <td><span class="badge badge-low">Worker</span></td>
+                  <td><span class="status-active">● Active</span></td>
+                  <td><div class="action-cell"><button class="btn btn-sm btn-outline">✏️ Edit</button><button class="btn btn-sm btn-ghost">🚫 Deactivate</button></div></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Create User Modal -->
+  <div class="modal-overlay" id="createUserModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>➕ Create New User Account</h3>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-info" style="font-size:13px;">
+          📧 Credentials will be sent to the user's registered email upon account creation.
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Full Name *</label>
+            <input type="text" class="form-control" placeholder="e.g. Dron G Kambali">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Role *</label>
+            <select class="form-control" id="roleSelect" onchange="updateIDLabel()">
+              <option value="">Select Role</option>
+              <option value="student">👨‍🎓 Student</option>
+              <option value="faculty">👨‍🏫 Faculty</option>
+              <option value="worker">👷 Worker</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email *</label>
+          <input type="email" class="form-control" placeholder="username@kletech.ac.in">
+          <p class="form-hint">Must be a @kletech.ac.in address</p>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Department *</label>
+            <select class="form-control">
+              <option>Select Department</option>
+              <option>CSE</option>
+              <option>ECE</option>
+              <option>ME</option>
+              <option>Civil</option>
+              <option>Canteen</option>
+              <option>Hostel</option>
+              <option>IT Dept</option>
+              <option>Electrical</option>
+              <option>Infrastructure</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" id="idLabel">USN / Staff ID *</label>
+            <input type="text" class="form-control" id="idInput" placeholder="e.g. 01FE21BCS045">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Temporary Password *</label>
+          <div class="password-group">
+            <input type="text" class="form-control" id="tempPassword" placeholder="Auto-generate or enter manually">
+            <button class="gen-pass-btn" onclick="generatePassword()">⚡ Generate</button>
+          </div>
+          <p class="form-hint">User will be prompted to change password on first login.</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="createUser()">✅ Create Account</button>
+      </div>
+    </div>
+  </div>
+
+  <footer><strong>KLE Technological University CMS</strong> — Web Technologies &amp; SE Project — 2025</footer>
+  <script>
+    function switchTab(name, btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + name).classList.add('active');
+    }
+    function openModal() { document.getElementById('createUserModal').classList.add('visible'); }
+    function closeModal() { document.getElementById('createUserModal').classList.remove('visible'); }
+    function generatePassword() {
+      var chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789@#';
+      var pass = Array.from({length:10}, () => chars[Math.floor(Math.random()*chars.length)]).join('');
+      document.getElementById('tempPassword').value = pass;
+    }
+    function updateIDLabel() {
+      var role = document.getElementById('roleSelect').value;
+      var labels = { student: 'USN *', faculty: 'Staff ID *', worker: 'Worker ID *' };
+      var placeholders = { student: 'e.g. 01FE21BCS045', faculty: 'e.g. FAC-CSE-014', worker: 'e.g. WRK-ELE-001' };
+      document.getElementById('idLabel').textContent = labels[role] || 'USN / Staff ID *';
+      document.getElementById('idInput').placeholder = placeholders[role] || '';
+    }
+    function createUser() {
+      closeModal();
+      var a = document.createElement('div');
+      a.className = 'alert alert-success mt-2';
+      a.innerHTML = '✅ <strong>User account created successfully!</strong> Credentials have been sent to the registered email.';
+      document.querySelector('.main').insertBefore(a, document.querySelector('.tab-nav'));
+      setTimeout(() => a.remove(), 4000);
+    }
+    function tableSearch(input, tableId) {
+      var val = input.value.toLowerCase();
+      document.querySelectorAll('#' + tableId + ' tbody tr').forEach(tr => {
+        tr.style.display = tr.textContent.toLowerCase().includes(val) ? '' : 'none';
+      });
+    }
+    function toggleTheme() {
+      var html = document.documentElement;
+      var next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('cms-theme', next);
+      document.getElementById('themeToggle').textContent = next === 'dark' ? '☀️' : '🌙';
+    }
+    document.getElementById('themeToggle').textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+  </script>
+</body>
+</html>

@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assign Complaint — KLE Tech CMS Admin</title>
+  <script>(function(){ var s=localStorage.getItem('cms-theme')||'light'; document.documentElement.setAttribute('data-theme',s); })();</script>
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    .assign-grid { display: grid; grid-template-columns: 1fr 1.4fr; gap: 1.5rem; }
+    .complaint-detail-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+    .complaint-detail-header { background: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%); padding: 1.5rem; color: #fff; }
+    .complaint-detail-header .cid { font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 700; opacity: 0.8; margin-bottom: 4px; }
+    .complaint-detail-header h2 { font-size: 20px; margin-bottom: 8px; }
+    .complaint-meta { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+    .complaint-meta-item { background: rgba(255,255,255,0.15); border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: 600; }
+    .complaint-detail-body { padding: 1.5rem; }
+    .detail-field { margin-bottom: 1rem; }
+    .detail-field label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); display: block; margin-bottom: 4px; font-family: 'Sora', sans-serif; }
+    .detail-field p { font-size: 14px; color: var(--text); }
+    .detail-field .description-box { background: var(--surface-2); border: 1.5px solid var(--border); border-radius: 9px; padding: 12px; font-size: 14px; color: var(--text); line-height: 1.6; }
+    .attachment-thumb { display: flex; align-items: center; gap: 8px; background: var(--surface-2); border: 1.5px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 13px; margin-top: 6px; }
+
+    /* Worker Assignment Panel */
+    .worker-panel { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+    .worker-panel-header { padding: 1.2rem 1.5rem; border-bottom: 1.5px solid var(--border); background: var(--surface-2); }
+    .worker-panel-header h3 { font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 700; }
+    .worker-panel-header p { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+    .worker-table-wrap { padding: 0; }
+    .worker-row { display: grid; grid-template-columns: 2fr 1.2fr 1fr 80px 100px; align-items: center; gap: 1rem; padding: 14px 1.5rem; border-bottom: 1px solid var(--border); transition: background 0.15s; cursor: pointer; }
+    .worker-row:last-child { border-bottom: none; }
+    .worker-row:hover { background: var(--surface-2); }
+    .worker-row.selected { background: var(--primary-soft); border-left: 4px solid var(--primary); }
+    [data-theme="dark"] .worker-row.selected { background: #1e2456; }
+    .worker-row-head { display: grid; grid-template-columns: 2fr 1.2fr 1fr 80px 100px; gap: 1rem; padding: 10px 1.5rem; background: var(--surface-2); border-bottom: 1.5px solid var(--border); }
+    .worker-row-head span { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-family: 'Sora', sans-serif; }
+    .worker-name-cell { display: flex; align-items: center; gap: 10px; }
+    .worker-avatar { width: 36px; height: 36px; border-radius: 10px; background: var(--primary-soft); display: flex; align-items: center; justify-content: center; font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 700; color: var(--primary); flex-shrink: 0; }
+    [data-theme="dark"] .worker-avatar { background: #1e2456; }
+    .worker-name-text { font-weight: 600; font-size: 14px; }
+    .worker-dept { font-size: 12px; color: var(--text-muted); }
+    .task-count { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 8px; font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 700; }
+    .task-count.low { background: #e8f5e9; color: var(--success); }
+    .task-count.mid { background: #fff3e0; color: var(--warning); }
+    .task-count.high { background: #fce4ec; color: var(--danger); }
+    [data-theme="dark"] .task-count.low { background: #0d2e1a; }
+    [data-theme="dark"] .task-count.mid { background: #3d2800; }
+    [data-theme="dark"] .task-count.high { background: #3d0d12; }
+
+    /* Action buttons after selection */
+    .post-assign-actions { padding: 1.2rem 1.5rem; background: var(--surface-2); border-top: 1.5px solid var(--border); display: none; }
+    .post-assign-actions.visible { display: block; }
+    .post-assign-actions h4 { font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 700; margin-bottom: 12px; }
+    .action-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
+
+    /* Callout */
+    .callout { background: var(--surface-2); border: 1.5px solid var(--border); border-radius: 10px; padding: 12px 16px; font-size: 14px; display: none; margin-top: 10px; }
+    .callout.visible { display: flex; align-items: center; gap: 10px; }
+    .callout-icon { font-size: 20px; }
+    .callout-text strong { display: block; font-size: 13px; font-weight: 700; }
+    .callout-text span { font-size: 12px; color: var(--text-muted); }
+
+    /* Dialog overlay */
+    .dialog-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; display: none; align-items: center; justify-content: center; }
+    .dialog-overlay.visible { display: flex; }
+    .dialog-box { background: var(--surface); border-radius: var(--radius); padding: 2rem; max-width: 440px; width: 90%; box-shadow: var(--shadow-lg); border: 1.5px solid var(--border); }
+    .dialog-icon { font-size: 40px; margin-bottom: 12px; text-align: center; }
+    .dialog-box h3 { font-family: 'Sora', sans-serif; font-size: 18px; text-align: center; margin-bottom: 8px; }
+    .dialog-box p { font-size: 14px; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; }
+    .dialog-actions { display: flex; gap: 10px; }
+
+    /* Success state */
+    .success-overlay { display: none; text-align: center; padding: 2rem; }
+    .success-overlay.visible { display: block; }
+    .success-circle { width: 72px; height: 72px; border-radius: 50%; background: #e8f5e9; display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 1rem; }
+    [data-theme="dark"] .success-circle { background: #0d2e1a; }
+
+    @media(max-width:900px) {
+      .assign-grid { grid-template-columns: 1fr; }
+      .worker-row, .worker-row-head { grid-template-columns: 1fr 1fr auto; }
+      .worker-row .dept-cell, .worker-row-head .dept-col { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-brand">
+      <div class="logo-box">K</div>
+      <div><span>KLE Tech CMS</span><small>cms.kletech.ac.in</small></div>
+    </div>
+    <div class="nav-links">
+      <a href="admin-home.html">🏠 Home</a>
+      <a href="admin-pending.html" class="active">⏳ Pending</a>
+      <a href="admin-history.html">📁 History</a>
+      <a href="admin-manage-users.html">➕ Manage Users</a>
+    </div>
+    <div class="nav-right">
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌙</button>
+      <div class="nav-user">
+        <span class="role-badge">🛡️ Admin</span>
+        <div class="avatar" style="background:var(--accent);color:#fff;">KM</div>
+        <div><div style="font-size:13px;font-weight:600;">Kavitha Murthy</div><div style="font-size:11px;opacity:0.7;">System Administrator</div></div>
+        <a href="../login.html" class="nav-logout">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Admin Panel</div>
+        <a href="admin-home.html" class="sidebar-item"><span class="icon">🏠</span> Dashboard</a>
+        <a href="admin-pending.html" class="sidebar-item active"><span class="icon">⏳</span> Pending Complaints<span class="sidebar-badge">8</span></a>
+        <a href="admin-history.html" class="sidebar-item"><span class="icon">📁</span> Resolved History</a>
+        <a href="admin-manage-users.html" class="sidebar-item"><span class="icon">👥</span> Manage Users</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Quick Actions</div>
+        <div class="sidebar-item"><span class="icon">🚨</span> Escalated<span class="sidebar-badge">3</span></div>
+        <div class="sidebar-item"><span class="icon">📊</span> Reports</div>
+        <div class="sidebar-item"><span class="icon">⚙️</span> Settings</div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="page-header">
+        <div class="breadcrumb">Admin › <a href="admin-pending.html" style="color:var(--primary);font-weight:600;">Pending Complaints</a> › <span>Assign #CMS-2025-0042</span></div>
+        <h1>🔧 Assign Complaint — <span style="color:var(--primary);">#CMS-2025-0042</span></h1>
+        <p>Select a worker to assign this complaint and confirm the assignment.</p>
+      </div>
+
+      <div class="assign-grid">
+        <!-- LEFT: Complaint Summary -->
+        <div>
+          <div class="complaint-detail-card">
+            <div class="complaint-detail-header">
+              <div class="cid">📋 COMPLAINT ID</div>
+              <h2>#CMS-2025-0042</h2>
+              <div class="complaint-meta">
+                <span class="complaint-meta-item">🍽️ Canteen</span>
+                <span class="complaint-meta-item">🔥 High Urgency</span>
+                <span class="complaint-meta-item">⏳ Pending</span>
+              </div>
+            </div>
+            <div class="complaint-detail-body">
+              <div class="detail-field">
+                <label>Submitted By</label>
+                <p>👤 Dron G Kambali &nbsp;<span style="font-size:12px;color:var(--text-muted);">(Student, 4th Sem — CSE)</span></p>
+              </div>
+              <div class="detail-field">
+                <label>Date Filed</label>
+                <p>📅 April 15, 2025 &nbsp;·&nbsp; <span style="color:var(--danger);font-weight:600;">2 days ago</span></p>
+              </div>
+              <div class="detail-field">
+                <label>Category</label>
+                <p>🍽️ Canteen — Block B Mess</p>
+              </div>
+              <div class="detail-field">
+                <label>Subject</label>
+                <p style="font-weight:600;">Food quality poor in Block-B canteen</p>
+              </div>
+              <div class="detail-field">
+                <label>Description</label>
+                <div class="description-box">
+                  The food served in Block-B canteen has been of very poor quality for the past week. There are frequent issues with undercooked rice, stale sabzi, and unhygienic serving conditions. Multiple students have complained but no action has been taken. The quality needs to be inspected and improved immediately.
+                </div>
+              </div>
+              <div class="detail-field">
+                <label>Attachments</label>
+                <div class="attachment-thumb">📷 <span>canteen_photo_1.jpg</span> <span style="margin-left:auto;color:var(--primary);font-size:12px;font-weight:600;cursor:pointer;">View</span></div>
+                <div class="attachment-thumb">📷 <span>canteen_photo_2.jpg</span> <span style="margin-left:auto;color:var(--primary);font-size:12px;font-weight:600;cursor:pointer;">View</span></div>
+              </div>
+              <div class="detail-field">
+                <label>Urgency Reason</label>
+                <div class="alert alert-danger" style="margin:0;">
+                  🔥 <strong>High priority</strong> — Multiple students affected. Health & hygiene concern. Pending for 48+ hours.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Worker Assignment -->
+        <div>
+          <div class="worker-panel">
+            <div class="worker-panel-header">
+              <h3>👷 Select a Worker to Assign</h3>
+              <p>Choose an available worker. Workers with fewer active tasks are preferred.</p>
+            </div>
+
+            <!-- Worker Table Header -->
+            <div class="worker-row-head">
+              <span>👷 Worker Name</span>
+              <span class="dept-col">Department</span>
+              <span>📞 Phone</span>
+              <span>Tasks</span>
+              <span>Action</span>
+            </div>
+
+            <!-- Workers -->
+            <div id="workerList">
+              <div class="worker-row" id="worker1" onclick="selectWorker('worker1','Ramesh Kumar','Electrical','98765XXXXX',2)">
+                <div class="worker-name-cell">
+                  <div class="worker-avatar">RK</div>
+                  <div>
+                    <div class="worker-name-text">Ramesh Kumar</div>
+                    <div class="worker-dept">Electrical Dept</div>
+                  </div>
+                </div>
+                <div class="dept-cell" style="font-size:13px;color:var(--text-muted);">Electrical</div>
+                <div style="font-size:13px;">98765XXXXX</div>
+                <div><span class="task-count mid">2</span></div>
+                <div><button class="btn btn-sm btn-primary" onclick="event.stopPropagation();selectWorker('worker1','Ramesh Kumar','Electrical','98765XXXXX',2)">Assign</button></div>
+              </div>
+
+              <div class="worker-row" id="worker2" onclick="selectWorker('worker2','Suresh Patil','Plumbing','97654XXXXX',0)">
+                <div class="worker-name-cell">
+                  <div class="worker-avatar" style="background:#e8f5e9;color:var(--success);">SP</div>
+                  <div>
+                    <div class="worker-name-text">Suresh Patil</div>
+                    <div class="worker-dept">Plumbing</div>
+                  </div>
+                </div>
+                <div class="dept-cell" style="font-size:13px;color:var(--text-muted);">Plumbing</div>
+                <div style="font-size:13px;">97654XXXXX</div>
+                <div><span class="task-count low">0</span></div>
+                <div><button class="btn btn-sm btn-primary" onclick="event.stopPropagation();selectWorker('worker2','Suresh Patil','Plumbing','97654XXXXX',0)">Assign</button></div>
+              </div>
+
+              <div class="worker-row" id="worker3" onclick="selectWorker('worker3','Anand Hegde','Canteen','96543XXXXX',1)">
+                <div class="worker-name-cell">
+                  <div class="worker-avatar" style="background:#fff3e0;color:var(--warning);">AH</div>
+                  <div>
+                    <div class="worker-name-text">Anand Hegde</div>
+                    <div class="worker-dept">Canteen / Facilities</div>
+                  </div>
+                </div>
+                <div class="dept-cell" style="font-size:13px;color:var(--text-muted);">Canteen</div>
+                <div style="font-size:13px;">96543XXXXX</div>
+                <div><span class="task-count low">1</span></div>
+                <div><button class="btn btn-sm btn-primary" onclick="event.stopPropagation();selectWorker('worker3','Anand Hegde','Canteen','96543XXXXX',1)">Assign</button></div>
+              </div>
+
+              <div class="worker-row" id="worker4" onclick="selectWorker('worker4','Manjunath B','Civil','95432XXXXX',3)">
+                <div class="worker-name-cell">
+                  <div class="worker-avatar" style="background:#fce4ec;color:var(--danger);">MB</div>
+                  <div>
+                    <div class="worker-name-text">Manjunath B</div>
+                    <div class="worker-dept">Civil / Infrastructure</div>
+                  </div>
+                </div>
+                <div class="dept-cell" style="font-size:13px;color:var(--text-muted);">Civil</div>
+                <div style="font-size:13px;">95432XXXXX</div>
+                <div><span class="task-count high">3</span></div>
+                <div><button class="btn btn-sm btn-outline btn-sm" onclick="event.stopPropagation();selectWorker('worker4','Manjunath B','Civil','95432XXXXX',3)">Assign</button></div>
+              </div>
+            </div>
+
+            <!-- Post-selection actions -->
+            <div class="post-assign-actions" id="postActions">
+              <h4 id="selectedWorkerLabel">📌 Selected: —</h4>
+
+              <!-- Phone Callout -->
+              <div class="callout" id="phoneCallout">
+                <div class="callout-icon">📞</div>
+                <div class="callout-text">
+                  <strong id="workerPhoneText">—</strong>
+                  <span>Registered mobile number</span>
+                </div>
+              </div>
+
+              <div class="action-buttons" style="margin-top:12px;">
+                <button class="btn btn-outline" onclick="showPhone()">📞 Call Worker</button>
+                <button class="btn btn-outline" onclick="showNotifDialog()">📲 Send Notification</button>
+                <button class="btn btn-primary" onclick="confirmAssignment()">✅ Confirm Assignment</button>
+              </div>
+
+              <div class="alert alert-info mt-2" style="font-size:12px;">
+                💡 Confirming will notify the worker via mobile SMS and email automatically.
+              </div>
+            </div>
+          </div>
+
+          <!-- Notes for Admin -->
+          <div class="card mt-2">
+            <div class="card-header"><h3>📝 Assignment Notes (Optional)</h3></div>
+            <div class="card-body">
+              <div class="form-group">
+                <label class="form-label">Add notes for the worker</label>
+                <textarea class="form-control" rows="3" placeholder="e.g. Please inspect the kitchen hygiene and quality of rice served at dinner..."></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Expected resolution by</label>
+                <input type="date" class="form-control" value="2025-04-17">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Notification Dialog -->
+  <div class="dialog-overlay" id="notifDialog">
+    <div class="dialog-box">
+      <div class="dialog-icon">📲</div>
+      <h3>Send Notification</h3>
+      <p id="notifDialogText">Notification will be sent to the worker's registered mobile number and email.</p>
+      <div class="dialog-actions">
+        <button class="btn btn-ghost w-full" onclick="closeDialog()">Cancel</button>
+        <button class="btn btn-primary w-full" onclick="closeDialog();showAlert('Notification sent successfully! ✅')">Send Now</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm Dialog -->
+  <div class="dialog-overlay" id="confirmDialog">
+    <div class="dialog-box">
+      <div class="dialog-icon">✅</div>
+      <h3>Confirm Assignment</h3>
+      <p id="confirmDialogText">Are you sure you want to assign complaint #CMS-2025-0042 to this worker?</p>
+      <div class="dialog-actions">
+        <button class="btn btn-ghost w-full" onclick="document.getElementById('confirmDialog').classList.remove('visible')">Cancel</button>
+        <button class="btn btn-success w-full" onclick="finalConfirm()">✅ Yes, Assign</button>
+      </div>
+    </div>
+  </div>
+
+  <footer><strong>KLE Technological University CMS</strong> — Web Technologies &amp; SE Project — 2025</footer>
+
+  <script>
+    var currentWorker = null;
+
+    function selectWorker(id, name, dept, phone, tasks) {
+      document.querySelectorAll('.worker-row').forEach(r => r.classList.remove('selected'));
+      document.getElementById(id).classList.add('selected');
+      currentWorker = { id, name, dept, phone, tasks };
+
+      document.getElementById('selectedWorkerLabel').textContent = '📌 Selected: ' + name + ' (' + dept + ')';
+      document.getElementById('workerPhoneText').textContent = phone;
+      document.getElementById('postActions').classList.add('visible');
+      document.getElementById('phoneCallout').classList.remove('visible');
+    }
+
+    function showPhone() {
+      document.getElementById('phoneCallout').classList.add('visible');
+    }
+
+    function showNotifDialog() {
+      if (!currentWorker) return;
+      document.getElementById('notifDialogText').textContent =
+        'Notification will be sent to ' + currentWorker.name + '\'s registered mobile number and email.';
+      document.getElementById('notifDialog').classList.add('visible');
+    }
+
+    function closeDialog() {
+      document.getElementById('notifDialog').classList.remove('visible');
+    }
+
+    function confirmAssignment() {
+      if (!currentWorker) return;
+      document.getElementById('confirmDialogText').textContent =
+        'Are you sure you want to assign complaint #CMS-2025-0042 to ' + currentWorker.name + '?';
+      document.getElementById('confirmDialog').classList.add('visible');
+    }
+
+    function finalConfirm() {
+      document.getElementById('confirmDialog').classList.remove('visible');
+      // Show success alert
+      var a = document.createElement('div');
+      a.className = 'alert alert-success mt-2';
+      a.innerHTML = '✅ <strong>Complaint #CMS-2025-0042 successfully assigned to ' + currentWorker.name + '!</strong> Worker has been notified.';
+      document.querySelector('.main').insertBefore(a, document.querySelector('.assign-grid'));
+      setTimeout(function(){ window.location.href = 'admin-pending.html'; }, 2000);
+    }
+
+    function showAlert(msg) {
+      var a = document.createElement('div');
+      a.className = 'alert alert-success mt-2';
+      a.textContent = msg;
+      document.getElementById('postActions').appendChild(a);
+    }
+
+    function toggleTheme() {
+      var html = document.documentElement;
+      var next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('cms-theme', next);
+      document.getElementById('themeToggle').textContent = next === 'dark' ? '☀️' : '🌙';
+    }
+    document.getElementById('themeToggle').textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+  </script>
+</body>
+</html>

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pending Complaints — KLE Tech CMS Admin</title>
+  <script>(function(){ var s=localStorage.getItem('cms-theme')||'light'; document.documentElement.setAttribute('data-theme',s); })();</script>
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    .filter-bar { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 1rem 1.5rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; box-shadow: var(--shadow); }
+    .search-wrap { flex: 1; position: relative; min-width: 180px; }
+    .search-wrap input { padding-left: 36px; }
+    .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 15px; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-brand">
+      <div class="logo-box">K</div>
+      <div><span>KLE Tech CMS</span><small>cms.kletech.ac.in</small></div>
+    </div>
+    <div class="nav-links">
+      <a href="admin-home.html">🏠 Home</a>
+      <a href="admin-pending.html" class="active">⏳ Pending</a>
+      <a href="admin-history.html">📁 History</a>
+      <a href="admin-manage-users.html">➕ Manage Users</a>
+    </div>
+    <div class="nav-right">
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌙</button>
+      <div class="nav-user">
+        <span class="role-badge">🛡️ Admin</span>
+        <div class="avatar" style="background:var(--accent);color:#fff;">KM</div>
+        <div><div style="font-size:13px;font-weight:600;">Kavitha Murthy</div><div style="font-size:11px;opacity:0.7;">System Administrator</div></div>
+        <a href="../login.html" class="nav-logout">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Admin Panel</div>
+        <a href="admin-home.html" class="sidebar-item"><span class="icon">🏠</span> Dashboard</a>
+        <a href="admin-pending.html" class="sidebar-item active"><span class="icon">⏳</span> Pending Complaints<span class="sidebar-badge">8</span></a>
+        <a href="admin-history.html" class="sidebar-item"><span class="icon">📁</span> Resolved History</a>
+        <a href="admin-manage-users.html" class="sidebar-item"><span class="icon">👥</span> Manage Users</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Filter Urgency</div>
+        <div class="sidebar-item"><span class="icon">🔴</span> High (3)</div>
+        <div class="sidebar-item"><span class="icon">🟡</span> Medium (5)</div>
+        <div class="sidebar-item"><span class="icon">🟢</span> Low (0)</div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="page-header">
+        <div class="breadcrumb">Admin › <span>Pending Complaints</span></div>
+        <h1>⏳ Pending Complaints</h1>
+        <p>8 complaints awaiting assignment to workers. High-priority items listed first.</p>
+      </div>
+
+      <div class="alert alert-danger">
+        🚨 <strong>3 High-priority complaints</strong> have been pending for more than 24 hours. Immediate assignment required.
+      </div>
+
+      <!-- Filter Bar -->
+      <div class="filter-bar">
+        <div class="chips">
+          <span class="chip active">All (8)</span>
+          <span class="chip">🔴 High (3)</span>
+          <span class="chip">🟡 Medium (5)</span>
+          <span class="chip">🟢 Low (0)</span>
+        </div>
+        <div style="width:1px;height:24px;background:var(--border);"></div>
+        <select class="form-control" style="width:160px;">
+          <option>All Categories</option>
+          <option>🍽️ Canteen</option>
+          <option>🏠 Hostel</option>
+          <option>💻 IT/WiFi</option>
+          <option>🔌 Electrical</option>
+        </select>
+        <select class="form-control" style="width:160px;">
+          <option>All Departments</option>
+          <option>CSE</option>
+          <option>ECE</option>
+          <option>Hostel</option>
+        </select>
+        <input type="date" class="form-control" style="width:150px;" value="2025-04-15">
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="form-control" placeholder="Search complaints…" style="padding-left:36px;">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Submitter</th>
+                <th>Category</th>
+                <th>🔥 Urgency</th>
+                <th>Department</th>
+                <th>Date Filed</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="complaint-id">#CMS-2025-049</span></td>
+                <td>Dron G Kambali <span style="font-size:11px;color:var(--text-muted);">(Student)</span></td>
+                <td>🍽️ Canteen</td>
+                <td><span class="badge badge-high">🔥 High</span></td>
+                <td>Canteen Mgmt</td>
+                <td>Apr 15, 2025</td>
+                <td><span class="badge badge-pending">⏳ Pending</span></td>
+                <td><a href="admin-assign.html" class="btn btn-sm btn-primary">Assign →</a></td>
+              </tr>
+              <tr>
+                <td><span class="complaint-id">#CMS-2025-048</span></td>
+                <td>Riya Sharma <span style="font-size:11px;color:var(--text-muted);">(Student)</span></td>
+                <td>🌐 Internet</td>
+                <td><span class="badge badge-high">🔥 High</span></td>
+                <td>IT Dept</td>
+                <td>Apr 14, 2025</td>
+                <td><span class="badge badge-pending">⏳ Pending</span></td>
+                <td><a href="admin-assign.html" class="btn btn-sm btn-primary">Assign →</a></td>
+              </tr>
+              <tr>
+                <td><span class="complaint-id">#CMS-2025-047</span></td>
+                <td>Dr. Priya Sharma <span style="font-size:11px;color:var(--text-muted);">(Faculty)</span></td>
+                <td>🔌 Electrical</td>
+                <td><span class="badge badge-high">🔥 High</span></td>
+                <td>Electrical Dept</td>
+                <td>Apr 13, 2025</td>
+                <td><span class="badge badge-pending">⏳ Pending</span></td>
+                <td><a href="admin-assign.html" class="btn btn-sm btn-primary">Assign →</a></td>
+              </tr>
+              <tr>
+                <td><span class="complaint-id">#CMS-2025-046</span></td>
+                <td>Amogh Samji <span style="font-size:11px;color:var(--text-muted);">(Student)</span></td>
+                <td>🏠 Hostel</td>
+                <td><span class="badge badge-medium">⚡ Medium</span></td>
+                <td>Hostel Warden</td>
+                <td>Apr 12, 2025</td>
+                <td><span class="badge badge-pending">⏳ Pending</span></td>
+                <td><a href="admin-assign.html" class="btn btn-sm btn-primary">Assign →</a></td>
+              </tr>
+              <tr>
+                <td><span class="complaint-id">#CMS-2025-045</span></td>
+                <td>Pramod Indi <span style="font-size:11px;color:var(--text-muted);">(Student)</span></td>
+                <td>🚿 Sanitation</td>
+                <td><span class="badge badge-medium">⚡ Medium</span></td>
+                <td>Facilities Mgmt</td>
+                <td>Apr 12, 2025</td>
+                <td><span class="badge badge-pending">⏳ Pending</span></td>
+                <td><a href="admin-assign.html" class="btn btn-sm btn-primary">Assign →</a></td>
+              </tr>
+              <tr>
+                <td><span class="complaint-id">#CMS-2025-044</span></td>
+                <td>Chinmay Sabarad <span style="font-size:11px;color:var(--text-muted);">(Student)</span></td>
+                <td>📚 Library</td>
+                <td><span class="badge badge-medium">⚡ Medium</span></td>
+                <td>Library Dept</td>
+                <td>Apr 11, 2025</td>
+                <td><span class="badge badge-pending">⏳ Pending</span></td>
+                <td><a href="admin-assign.html" class="btn btn-sm btn-primary">Assign →</a></td>
+              </tr>
+              <tr>
+                <td><span class="complaint-id">#CMS-2025-043</span></td>
+                <td>Bheemanguda P <span style="font-size:11px;color:var(--text-muted);">(Student)</span></td>
+                <td>🚌 Transport</td>
+                <td><span class="badge badge-medium">⚡ Medium</span></td>
+                <td>Transport Dept</td>
+                <td>Apr 11, 2025</td>
+                <td><span class="badge badge-pending">⏳ Pending</span></td>
+                <td><a href="admin-assign.html" class="btn btn-sm btn-primary">Assign →</a></td>
+              </tr>
+              <tr>
+                <td><span class="complaint-id">#CMS-2025-042</span></td>
+                <td>Arjun Nair <span style="font-size:11px;color:var(--text-muted);">(Student)</span></td>
+                <td>🔧 Infrastructure</td>
+                <td><span class="badge badge-medium">⚡ Medium</span></td>
+                <td>Civil / Infra</td>
+                <td>Apr 10, 2025</td>
+                <td><span class="badge badge-pending">⏳ Pending</span></td>
+                <td><a href="admin-assign.html" class="btn btn-sm btn-primary">Assign →</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <footer><strong>KLE Technological University CMS</strong> — Web Technologies &amp; SE Project — 2025</footer>
+  <script>
+    document.querySelectorAll('.chip').forEach(c=>{ c.addEventListener('click',function(){ document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active')); this.classList.add('active'); }); });
+    function toggleTheme() { var html=document.documentElement; var next=html.getAttribute('data-theme')==='dark'?'light':'dark'; html.setAttribute('data-theme',next); localStorage.setItem('cms-theme',next); document.getElementById('themeToggle').textContent=next==='dark'?'☀️':'🌙'; }
+    document.getElementById('themeToggle').textContent = document.documentElement.getAttribute('data-theme')==='dark'?'☀️':'🌙';
+  </script>
+</body>
+</html>
