@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — KLE Tech CMS</title>
+  <script>(function(){ var s=localStorage.getItem('cms-theme')||'light'; document.documentElement.setAttribute('data-theme',s); })();</script>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body { background: linear-gradient(135deg, #1a237e 0%, #283593 50%, #1565c0 100%); min-height: 100vh; display: flex; flex-direction: column; }
+    [data-theme="dark"] body { background: linear-gradient(135deg, #0a0c1a 0%, #12165c 50%, #0d2a5e 100%); }
+    .login-wrapper { flex: 1; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+    .login-split { display: grid; grid-template-columns: 1fr 440px; max-width: 900px; width: 100%; background: var(--surface); border-radius: 24px; overflow: hidden; box-shadow: 0 32px 80px rgba(0,0,0,0.35); }
+    .login-hero { background: linear-gradient(160deg, #1a237e 0%, #0d47a1 100%); padding: 3rem; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; }
+    .login-hero::before { content: ''; position: absolute; top: -60px; right: -60px; width: 260px; height: 260px; border-radius: 50%; background: rgba(255,255,255,0.05); }
+    .login-hero::after { content: ''; position: absolute; bottom: -80px; left: -40px; width: 300px; height: 300px; border-radius: 50%; background: rgba(255,214,0,0.08); }
+    .hero-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.9); font-size: 12px; font-weight: 600; padding: 6px 14px; border-radius: 20px; margin-bottom: 2rem; width: fit-content; font-family: 'Sora', sans-serif; }
+    .hero-title { font-family: 'Sora', sans-serif; font-size: 30px; font-weight: 800; color: #fff; line-height: 1.2; margin-bottom: 1rem; }
+    .hero-title span { color: var(--gold); }
+    .hero-desc { color: rgba(255,255,255,0.70); font-size: 14px; line-height: 1.7; }
+    .hero-features { margin-top: 2rem; display: flex; flex-direction: column; gap: 12px; }
+    .hero-feat { display: flex; align-items: center; gap: 10px; color: rgba(255,255,255,0.85); font-size: 13px; }
+    .hero-feat-icon { width: 28px; height: 28px; background: rgba(255,255,255,0.12); border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+    .hero-uni { color: rgba(255,255,255,0.50); font-size: 12px; margin-top: auto; padding-top: 2rem; }
+    .login-form-wrap { padding: 3rem 2.5rem; background: var(--surface); }
+    .login-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 2rem; }
+    .login-logo .logo-box { width: 42px; height: 42px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-family: 'Sora', sans-serif; font-weight: 800; font-size: 20px; color: #fff; }
+    .login-logo .logo-text { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 18px; color: var(--primary); line-height: 1.1; }
+    .login-logo .logo-sub { font-size: 11px; color: var(--text-muted); font-weight: 400; }
+    .login-title { font-size: 24px; font-family: 'Sora', sans-serif; margin-bottom: 4px; color: var(--text); }
+    .login-sub { font-size: 14px; color: var(--text-muted); margin-bottom: 2rem; }
+    .role-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 1.5rem; }
+    .role-tab { padding: 9px 6px; border-radius: 9px; border: 1.5px solid var(--border); background: var(--surface-2); text-align: center; cursor: pointer; transition: all 0.2s; }
+    .role-tab .role-icon { font-size: 18px; }
+    .role-tab .role-name { font-size: 10px; font-weight: 600; font-family: 'Sora', sans-serif; color: var(--text-muted); margin-top: 3px; }
+    .role-tab.active { border-color: var(--primary); background: var(--primary-soft); }
+    .role-tab.active .role-name { color: var(--primary); }
+    .forgot { text-align: right; font-size: 13px; color: var(--primary); font-weight: 500; cursor: pointer; display: block; margin-top: -0.5rem; margin-bottom: 1.2rem; }
+    .new-user-notice { background: var(--surface-2); border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; font-size: 12px; color: var(--text-muted); text-align: center; margin-top: 1.5rem; }
+    .login-theme-btn { position: fixed; top: 1rem; right: 1rem; background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); color: #fff; width: 38px; height: 38px; border-radius: 10px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 200; }
+    footer { background: rgba(0,0,0,0.25); color: rgba(255,255,255,0.6); padding: 1rem; text-align: center; font-size: 12px; }
+    footer strong { color: rgba(255,255,255,0.9); }
+    @media(max-width:700px){ .login-split{grid-template-columns:1fr;} .login-hero{display:none;} }
+  </style>
+</head>
+<body>
+  <button class="login-theme-btn" id="themeToggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+
+  <div class="login-wrapper">
+    <div class="login-split">
+      <!-- Hero Side -->
+      <div class="login-hero">
+        <div>
+          <div class="hero-title">Complaint<br>Management<br><span>System</span></div>
+          <div class="hero-desc">A centralized digital grievance platform for KLE Tech students, staff, and administration.</div>
+          <div class="hero-features">
+            <div class="hero-feat"><div class="hero-feat-icon">📝</div> Submit complaints anytime, anywhere</div>
+            <div class="hero-feat"><div class="hero-feat-icon">📊</div> Real-time status tracking</div>
+            <div class="hero-feat"><div class="hero-feat-icon">🔔</div> Instant email notifications</div>
+            <div class="hero-feat"><div class="hero-feat-icon">🔒</div> Anonymous complaint support</div>
+            <div class="hero-feat"><div class="hero-feat-icon">📈</div> Admin reports &amp; analytics</div>
+          </div>
+        </div>
+        <div class="hero-uni">KLE Technological University, Hubbali<br></div>
+      </div>
+
+      <!-- Form Side -->
+      <div class="login-form-wrap">
+        <div class="login-logo">
+          <div class="logo-box">K</div>
+          <div>
+            <div class="logo-text">KLE Tech CMS</div>
+            <div class="logo-sub">cms.kletech.ac.in</div>
+          </div>
+        </div>
+        <div class="login-title">Welcome back</div>
+        <div class="login-sub">Sign in to continue to your portal</div>
+
+        <!-- Role Selector -->
+        <div class="role-tabs">
+          <div class="role-tab active" onclick="selectRole(this,'student/student-home.html')">
+            <div class="role-icon">👨‍🎓</div>
+            <div class="role-name">Student</div>
+          </div>
+          <div class="role-tab" onclick="selectRole(this,'faculty/faculty-home.html')">
+            <div class="role-icon">👩‍🏫</div>
+            <div class="role-name">Faculty</div>
+          </div>
+          <div class="role-tab" onclick="selectRole(this,'admin/admin-home.html')">
+            <div class="role-icon">🛡️</div>
+            <div class="role-name">Admin</div>
+          </div>
+          <div class="role-tab" onclick="selectRole(this,'hod/hod-home.html')">
+            <div class="role-icon">🎓</div>
+            <div class="role-name">HOD</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">KLE Tech Email</label>
+          <input type="email" class="form-control" placeholder="yourname@kletech.ac.in">
+          <div class="form-hint">Use your official @kletech.ac.in email</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <div style="position:relative;">
+            <input type="password" class="form-control" placeholder="Enter your password" id="pwdField">
+            <button onclick="togglePwd()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:var(--text-muted);" id="eyeBtn">👁️</button>
+          </div>
+        </div>
+        <a class="forgot" href="#">Forgot password?</a>
+
+        <a href="student/student-home.html" id="loginBtn" class="btn btn-primary w-full" style="padding:12px;">
+          🔐 &nbsp; Sign In
+        </a>
+
+        <div class="new-user-notice">
+          🔒 New user? Contact your department admin to get access.<br>
+          <span style="font-size:11px;opacity:0.8;">Students &amp; Faculty cannot self-register.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer><strong>KLE Technological University CMS</strong></footer>
+
+  <script>
+    var roleMap = { active: 'student/student-home.html' };
+
+    function selectRole(el, href) {
+      document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+      document.getElementById('loginBtn').href = href;
+    }
+
+    function togglePwd() {
+      var f = document.getElementById('pwdField');
+      f.type = f.type === 'password' ? 'text' : 'password';
+    }
+
+    function toggleTheme() {
+      var html = document.documentElement;
+      var next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('cms-theme', next);
+      document.getElementById('themeToggle').textContent = next === 'dark' ? '☀️' : '🌙';
+    }
+    document.getElementById('themeToggle').textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+  </script>
+</body>
+</html>

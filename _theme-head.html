@@ -1,0 +1,7 @@
+<!-- Theme: place in <head> to prevent flash -->
+<script>
+  (function(){
+    var saved = localStorage.getItem('cms-theme') || 'light';
+    document.documentElement.setAttribute('data-theme', saved);
+  })();
+</script>
