@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Complaint Status — KLE Tech CMS</title>
+  <script>(function(){ var s=localStorage.getItem('cms-theme')||'light'; document.documentElement.setAttribute('data-theme',s); })();</script>
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    .tracker-wrap { display: grid; grid-template-columns: 340px 1fr; gap: 1.5rem; align-items: start; }
+    .complaint-mini { border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 14px; cursor: pointer; transition: all 0.2s; margin-bottom: 8px; background: var(--surface); }
+    .complaint-mini:hover { border-color: var(--primary); }
+    .complaint-mini.active { border-color: var(--primary); background: var(--primary-soft); box-shadow: 0 0 0 2px rgba(26,35,126,0.10); }
+    .mini-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .mini-id { font-family: 'Sora', sans-serif; font-size: 12px; font-weight: 700; color: var(--primary); }
+    .mini-subject { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+    .mini-date { font-size: 11px; color: var(--text-muted); }
+    .progress-stepper { display: flex; align-items: flex-start; gap: 0; margin: 1.5rem 0; }
+    .ps-step { flex: 1; text-align: center; position: relative; }
+    .ps-step:not(:last-child)::after { content: ''; position: absolute; top: 17px; left: 55%; right: -45%; height: 3px; background: var(--border); z-index: 0; }
+    .ps-step.done:not(:last-child)::after { background: var(--success); }
+    .ps-step.active:not(:last-child)::after { background: linear-gradient(90deg, var(--primary), var(--border)); }
+    .ps-dot { width: 36px; height: 36px; border-radius: 50%; border: 3px solid var(--border); background: var(--surface); display: flex; align-items: center; justify-content: center; font-size: 14px; margin: 0 auto 8px; position: relative; z-index: 1; }
+    .ps-step.done .ps-dot { background: var(--success); border-color: var(--success); color: #fff; }
+    .ps-step.active .ps-dot { background: var(--primary); border-color: var(--primary); color: #fff; box-shadow: 0 0 0 4px rgba(26,35,126,0.15); }
+    .ps-label { font-size: 11px; font-weight: 600; font-family: 'Sora', sans-serif; color: var(--text-muted); }
+    .ps-step.done .ps-label, .ps-step.active .ps-label { color: var(--text); }
+    .ps-date { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+    .detail-row { display: flex; gap: 8px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-key { color: var(--text-muted); font-weight: 500; width: 140px; flex-shrink: 0; }
+    .detail-val { color: var(--text); font-weight: 500; flex: 1; }
+    .search-bar { display: flex; gap: 8px; margin-bottom: 1rem; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-brand">
+      <div class="logo-box">K</div>
+      <div><span>KLE Tech CMS</span><small>cms.kletech.ac.in</small></div>
+    </div>
+    <div class="nav-links">
+      <a href="student-home.html">🏠 Home</a>
+      <a href="student-complaint-form.html">📝 New Complaint</a>
+      <a href="student-complaints-list.html" class="active">📋 My Complaints</a>
+    </div>
+    <div class="nav-right">
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌙</button>
+      <div class="nav-user">
+        <span class="role-badge">👨‍🎓 Student</span>
+        <div class="avatar">DG</div>
+        <div><div style="font-size:13px;font-weight:600;">Dron G Kambali</div><div style="font-size:11px;opacity:0.7;">01FE24BCS141</div></div>
+        <a href="../login.html" class="nav-logout">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Menu</div>
+        <a href="student-home.html" class="sidebar-item"><span class="icon">🏠</span> Dashboard</a>
+        <a href="student-complaint-form.html" class="sidebar-item"><span class="icon">📝</span> New Complaint</a>
+        <a href="student-complaints-list.html" class="sidebar-item active"><span class="icon">📋</span> My Complaints</a>
+        <div class="sidebar-item"><span class="icon">🔔</span> Notifications<span class="sidebar-badge">3</span></div>
+        <div class="sidebar-item"><span class="icon">👤</span> My Profile</div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="page-header">
+        <div class="breadcrumb">Dashboard › My Complaints › <span>#CMS-2025-041</span></div>
+        <div class="flex-between">
+          <h1>Complaint #CMS-2025-041</h1>
+          <a href="student-complaints-list.html" class="btn btn-ghost btn-sm">← Back to My Complaints</a>
+        </div>
+        <p>Real-time status tracking for your complaint (FR-06)</p>
+      </div>
+
+      <div class="tracker-wrap">
+        <!-- Left list -->
+        <div>
+          <div class="search-bar">
+            <input type="text" class="form-control" placeholder="Search complaints…">
+            <button class="btn btn-primary btn-sm">🔍</button>
+          </div>
+          <div class="chips mb-2">
+            <span class="chip active">All (7)</span>
+            <span class="chip">Pending</span>
+            <span class="chip">In Progress</span>
+            <span class="chip">Resolved</span>
+          </div>
+
+          <div class="complaint-mini active">
+            <div class="mini-top"><span class="mini-id">#CMS-2025-041</span><span class="badge badge-pending">⏳ Pending</span></div>
+            <div class="mini-subject">Food quality poor in Block-B canteen</div>
+            <div class="mini-date">🍽️ Canteen · Apr 12, 2025</div>
+          </div>
+          <div class="complaint-mini">
+            <div class="mini-top"><span class="mini-id">#CMS-2025-038</span><span class="badge badge-progress">🔧 In Progress</span></div>
+            <div class="mini-subject">WiFi not working in Lab 3</div>
+            <div class="mini-date">💻 IT/WiFi · Apr 10, 2025</div>
+          </div>
+          <div class="complaint-mini">
+            <div class="mini-top"><span class="mini-id">#CMS-2025-031</span><span class="badge badge-escalated">🚨 Escalated</span></div>
+            <div class="mini-subject">Water supply disruption, Block C</div>
+            <div class="mini-date">🏠 Hostel · Apr 5, 2025</div>
+          </div>
+          <div class="complaint-mini">
+            <div class="mini-top"><span class="mini-id">#CMS-2025-019</span><span class="badge badge-resolved">✅ Resolved</span></div>
+            <div class="mini-subject">Attendance not updated for DS lab</div>
+            <div class="mini-date">📚 Academics · Mar 28, 2025</div>
+          </div>
+          <div class="complaint-mini">
+            <div class="mini-top"><span class="mini-id">#CMS-2025-012</span><span class="badge badge-resolved">✅ Resolved</span></div>
+            <div class="mini-subject">Broken bench in Room 204</div>
+            <div class="mini-date">🔧 Infrastructure · Mar 20, 2025</div>
+          </div>
+        </div>
+
+        <!-- Right detail -->
+        <div>
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3>#CMS-2025-041 — Food Quality Complaint</h3>
+                <div style="font-size:12px;color:var(--text-muted);margin-top:3px;">Submitted on April 12, 2025 · 🍽️ Canteen · <span class="badge badge-high" style="font-size:10px;">🔥 High</span></div>
+              </div>
+              <span class="badge badge-pending">⏳ Pending</span>
+            </div>
+            <div class="card-body">
+              <!-- Progress Stepper -->
+              <div class="progress-stepper">
+                <div class="ps-step done">
+                  <div class="ps-dot">✓</div>
+                  <div class="ps-label">Submitted</div>
+                  <div class="ps-date">Apr 12</div>
+                </div>
+                <div class="ps-step active">
+                  <div class="ps-dot">⏳</div>
+                  <div class="ps-label">Pending</div>
+                  <div class="ps-date">Now</div>
+                </div>
+                <div class="ps-step">
+                  <div class="ps-dot">🔧</div>
+                  <div class="ps-label">In Progress</div>
+                  <div class="ps-date">—</div>
+                </div>
+                <div class="ps-step">
+                  <div class="ps-dot">✅</div>
+                  <div class="ps-label">Resolved</div>
+                  <div class="ps-date">—</div>
+                </div>
+              </div>
+
+              <!-- Details -->
+              <div class="detail-row"><span class="detail-key">Complaint ID</span><span class="detail-val">#CMS-2025-041</span></div>
+              <div class="detail-row"><span class="detail-key">Category</span><span class="detail-val">🍽️ Canteen</span></div>
+              <div class="detail-row"><span class="detail-key">Department</span><span class="detail-val">Canteen Management</span></div>
+              <div class="detail-row"><span class="detail-key">Priority</span><span class="detail-val"><span class="badge badge-high">🔥 High</span></span></div>
+              <div class="detail-row"><span class="detail-key">Submitted By</span><span class="detail-val">Dron G Kambali (01FE24BCS141)</span></div>
+              <div class="detail-row"><span class="detail-key">Assigned To</span><span class="detail-val" style="color:var(--text-muted);">Not yet assigned</span></div>
+              <div class="detail-row" style="align-items:flex-start;">
+                <span class="detail-key">Description</span>
+                <span class="detail-val" style="font-weight:400;font-size:13px;color:var(--text-muted);">The food quality in Block-B canteen has degraded significantly over the past 2 weeks. The rice is undercooked and the dal is watery. Several students have complained about this. This is affecting our health and concentration.</span>
+              </div>
+              <div class="detail-row"><span class="detail-key">Attachment</span><span class="detail-val" style="color:var(--text-muted);">None uploaded</span></div>
+
+              <!-- Activity Timeline -->
+              <div style="margin-top:1.5rem;">
+                <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:14px;margin-bottom:1rem;">📋 Activity Timeline</div>
+                <ul class="timeline">
+                  <li class="timeline-item">
+                    <div class="timeline-dot done">✓</div>
+                    <div class="timeline-content">
+                      <div class="timeline-title">Complaint Submitted</div>
+                      <div class="timeline-date">April 12, 2025 · 10:34 AM</div>
+                      <div class="timeline-desc">Complaint #CMS-2025-041 registered. Status set to Pending. Email confirmation sent to 01fe24bcs141@kletech.ac.in</div>
+                    </div>
+                  </li>
+                  <li class="timeline-item">
+                    <div class="timeline-dot active">⏳</div>
+                    <div class="timeline-content">
+                      <div class="timeline-title">Awaiting Admin Assignment</div>
+                      <div class="timeline-date">April 12, 2025 — Present</div>
+                      <div class="timeline-desc">Complaint is in queue. Waiting for admin to assign to Canteen Management department.</div>
+                    </div>
+                  </li>
+                  <li class="timeline-item">
+                    <div class="timeline-dot">🔧</div>
+                    <div class="timeline-content">
+                      <div class="timeline-title">In Progress</div>
+                      <div class="timeline-date">Pending</div>
+                      <div class="timeline-desc">Will begin once assigned to department staff.</div>
+                    </div>
+                  </li>
+                  <li class="timeline-item">
+                    <div class="timeline-dot">✅</div>
+                    <div class="timeline-content">
+                      <div class="timeline-title">Resolved</div>
+                      <div class="timeline-date">Pending</div>
+                      <div class="timeline-desc">Resolution note will appear here once complaint is resolved.</div>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+
+              <div class="alert alert-warning mt-2">
+                ⏰ Auto-escalation in <strong>2 working days</strong> if unresolved (FR-08)
+              </div>
+
+              <div style="display:flex;gap:8px;margin-top:1rem;flex-wrap:wrap;">
+                <button class="btn btn-ghost btn-sm">📥 Download PDF</button>
+                <button class="btn btn-ghost btn-sm">✉️ Resend Email</button>
+                <button class="btn btn-ghost btn-sm" style="color:var(--danger);border-color:var(--danger);">🗑️ Withdraw Complaint</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <footer><strong>KLE Technological University CMS</strong> — Web Technologies &amp; SE Project — 2025</footer>
+  <script>
+    function toggleTheme() { var html=document.documentElement; var next=html.getAttribute('data-theme')==='dark'?'light':'dark'; html.setAttribute('data-theme',next); localStorage.setItem('cms-theme',next); document.getElementById('themeToggle').textContent=next==='dark'?'☀️':'🌙'; }
+    document.getElementById('themeToggle').textContent = document.documentElement.getAttribute('data-theme')==='dark'?'☀️':'🌙';
+  </script>
+</body>
+</html>

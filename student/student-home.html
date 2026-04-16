@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Dashboard — KLE Tech CMS</title>
+  <script>(function(){ var s=localStorage.getItem('cms-theme')||'light'; document.documentElement.setAttribute('data-theme',s); })();</script>
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    .quick-actions { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin-bottom: 2rem; }
+    .quick-action { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 1.2rem; text-align: center; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow); }
+    .quick-action:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+    .qa-icon { font-size: 28px; margin-bottom: 6px; }
+    .qa-label { font-size: 13px; font-weight: 600; font-family: 'Sora', sans-serif; color: var(--text); }
+    .qa-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .how-it-works { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; margin-bottom: 2rem; }
+    .hw-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 1.4rem; text-align: center; box-shadow: var(--shadow); }
+    .hw-num { width: 32px; height: 32px; background: var(--primary); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Sora', sans-serif; font-weight: 700; font-size: 14px; margin: 0 auto 10px; }
+    .hw-icon { font-size: 28px; margin-bottom: 8px; }
+    .hw-title { font-size: 14px; font-weight: 600; font-family: 'Sora', sans-serif; margin-bottom: 4px; }
+    .hw-desc { font-size: 12px; color: var(--text-muted); }
+    .notify-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; display: inline-block; margin-left: 6px; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-brand">
+      <div class="logo-box">K</div>
+      <div><span>KLE Tech CMS</span><small>cms.kletech.ac.in</small></div>
+    </div>
+    <div class="nav-links">
+      <a href="student-home.html" class="active">🏠 Home</a>
+      <a href="student-complaint-form.html">📝 New Complaint</a>
+      <a href="student-complaints-list.html">📋 My Complaints</a>
+      <a href="#">👤 Profile</a>
+    </div>
+    <div class="nav-right">
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌙</button>
+      <div class="nav-user">
+        <span class="role-badge">👨‍🎓 Student</span>
+        <div class="avatar">DG</div>
+        <div>
+          <div style="font-size:13px;font-weight:600;">Dron G Kambali</div>
+          <div style="font-size:11px;opacity:0.7;">01FE24BCS141</div>
+        </div>
+        <a href="../login.html" class="nav-logout">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Menu</div>
+        <a href="student-home.html" class="sidebar-item active"><span class="icon">🏠</span> Dashboard</a>
+        <a href="student-complaint-form.html" class="sidebar-item"><span class="icon">📝</span> New Complaint</a>
+        <a href="student-complaints-list.html" class="sidebar-item"><span class="icon">📋</span> My Complaints</a>
+        <div class="sidebar-item"><span class="icon">🔔</span> Notifications<span class="sidebar-badge">3</span></div>
+        <div class="sidebar-item"><span class="icon">👤</span> My Profile</div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Quick Filter</div>
+        <div class="sidebar-item"><span class="icon">⏳</span> Pending (2)</div>
+        <div class="sidebar-item"><span class="icon">🔧</span> In Progress (2)</div>
+        <div class="sidebar-item"><span class="icon">✅</span> Resolved (3)</div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="welcome-banner">
+        <div>
+          <h2>👋 Welcome back, Dron!</h2>
+          <p>You have 2 pending complaints. Check your status updates below.</p>
+          <div style="margin-top:8px;font-size:12px;opacity:0.8;">🏛️ KLE Technological University &nbsp;·&nbsp; 📚 CSE — Semester 4 &nbsp;·&nbsp; 🆔 01FE24BCS141</div>
+        </div>
+        <a href="student-complaint-form.html" class="btn btn-accent">+ New Complaint</a>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card blue">
+          <div class="stat-label">Total Submitted</div>
+          <div class="stat-value">7</div>
+          <div class="stat-sub">Since admission</div>
+          <div class="stat-icon">📋</div>
+        </div>
+        <div class="stat-card orange">
+          <div class="stat-label">Pending</div>
+          <div class="stat-value">2</div>
+          <div class="stat-sub">Awaiting action</div>
+          <div class="stat-icon">⏳</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-label">In Progress</div>
+          <div class="stat-value">2</div>
+          <div class="stat-sub">Being resolved</div>
+          <div class="stat-icon">🔧</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-label">Resolved</div>
+          <div class="stat-value">3</div>
+          <div class="stat-sub">Completed</div>
+          <div class="stat-icon">✅</div>
+        </div>
+      </div>
+
+      <!-- How It Works -->
+      <div class="mb-2" style="font-family:'Sora',sans-serif;font-size:16px;font-weight:700;margin-bottom:1rem;">How It Works</div>
+      <div class="how-it-works">
+        <div class="hw-card">
+          <div class="hw-num">1</div>
+          <div class="hw-icon">📝</div>
+          <div class="hw-title">Submit Complaint</div>
+          <div class="hw-desc">File your grievance with category, urgency level, and description</div>
+        </div>
+        <div class="hw-card">
+          <div class="hw-num">2</div>
+          <div class="hw-icon">🔧</div>
+          <div class="hw-title">Admin Assigns Worker</div>
+          <div class="hw-desc">Admin reviews and assigns complaint to the appropriate department worker</div>
+        </div>
+        <div class="hw-card">
+          <div class="hw-num">3</div>
+          <div class="hw-icon">✅</div>
+          <div class="hw-title">Get Notified</div>
+          <div class="hw-desc">You receive email updates at every status change until resolution</div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="quick-actions">
+        <a href="student-complaint-form.html" class="quick-action">
+          <div class="qa-icon">📝</div>
+          <div class="qa-label">File Complaint</div>
+          <div class="qa-sub">Submit new grievance</div>
+        </a>
+        <a href="student-complaints-list.html" class="quick-action">
+          <div class="qa-icon">🔍</div>
+          <div class="qa-label">Track Status</div>
+          <div class="qa-sub">View complaint history</div>
+        </a>
+        <div class="quick-action">
+          <div class="qa-icon">🔔</div>
+          <div class="qa-label">Notifications <span class="notify-dot"></span></div>
+          <div class="qa-sub">3 new updates</div>
+        </div>
+        <div class="quick-action">
+          <div class="qa-icon">📥</div>
+          <div class="qa-label">Download Report</div>
+          <div class="qa-sub">My complaint history</div>
+        </div>
+      </div>
+
+      <!-- Recent Complaints Table -->
+      <div class="card">
+        <div class="card-header">
+          <h3>📋 Recent Complaints</h3>
+          <a href="student-complaints-list.html" class="btn btn-outline btn-sm">View All →</a>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Complaint ID</th>
+                <th>Category</th>
+                <th>Subject</th>
+                <th>🔥 Urgency</th>
+                <th>⏳ Status</th>
+                <th>Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="complaint-id">#CMS-2025-041</span></td>
+                <td>🍽️ Canteen</td>
+                <td>Food quality poor in Block-B</td>
+                <td><span class="badge badge-high">🔥 High</span></td>
+                <td><span class="badge badge-pending">⏳ Pending</span></td>
+                <td>Apr 12, 2025</td>
+                <td><a href="complaint-status.html" class="btn btn-sm btn-outline">View →</a></td>
+              </tr>
+              <tr>
+                <td><span class="complaint-id">#CMS-2025-038</span></td>
+                <td>💻 IT / WiFi</td>
+                <td>WiFi not working in Lab 3</td>
+                <td><span class="badge badge-medium">⚡ Medium</span></td>
+                <td><span class="badge badge-progress">🔧 In Progress</span></td>
+                <td>Apr 10, 2025</td>
+                <td><a href="complaint-status.html" class="btn btn-sm btn-outline">View →</a></td>
+              </tr>
+              <tr>
+                <td><span class="complaint-id">#CMS-2025-031</span></td>
+                <td>🏠 Hostel</td>
+                <td>Water supply disruption, Block C</td>
+                <td><span class="badge badge-high">🔥 High</span></td>
+                <td><span class="badge badge-escalated">🚨 Escalated</span></td>
+                <td>Apr 5, 2025</td>
+                <td><a href="complaint-status.html" class="btn btn-sm btn-outline">View →</a></td>
+              </tr>
+              <tr>
+                <td><span class="complaint-id">#CMS-2025-019</span></td>
+                <td>📚 Academics</td>
+                <td>Attendance not updated for DS</td>
+                <td><span class="badge badge-low">📋 Low</span></td>
+                <td><span class="badge badge-resolved">✅ Resolved</span></td>
+                <td>Mar 28, 2025</td>
+                <td><a href="complaint-status.html" class="btn btn-sm btn-ghost">View →</a></td>
+              </tr>
+              <tr>
+                <td><span class="complaint-id">#CMS-2025-012</span></td>
+                <td>🔧 Infrastructure</td>
+                <td>Broken bench in Room 204</td>
+                <td><span class="badge badge-low">📋 Low</span></td>
+                <td><span class="badge badge-resolved">✅ Resolved</span></td>
+                <td>Mar 20, 2025</td>
+                <td><a href="complaint-status.html" class="btn btn-sm btn-ghost">View →</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="alert alert-warning mt-2">
+        ⚠️ <strong>Escalation Notice:</strong> Complaint #CMS-2025-031 has crossed 5 working days without resolution and has been escalated to HOD.
+      </div>
+    </main>
+  </div>
+
+  <footer><strong>KLE Technological University CMS</strong></footer>
+  <script>
+    function toggleTheme() {
+      var html = document.documentElement;
+      var next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('cms-theme', next);
+      document.getElementById('themeToggle').textContent = next === 'dark' ? '☀️' : '🌙';
+    }
+    document.getElementById('themeToggle').textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+  </script>
+</body>
+</html>
