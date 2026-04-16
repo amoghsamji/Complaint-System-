@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Faculty Dashboard — KLE Tech CMS</title>
+  <script>(function(){ var s=localStorage.getItem('cms-theme')||'light'; document.documentElement.setAttribute('data-theme',s); })();</script>
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    .quick-actions { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin-bottom: 2rem; }
+    .quick-action { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 1.2rem; text-align: center; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow); }
+    .quick-action:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+    .qa-icon { font-size: 28px; margin-bottom: 6px; }
+    .qa-label { font-size: 13px; font-weight: 600; font-family: 'Sora', sans-serif; color: var(--text); }
+    .qa-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-brand">
+      <div class="logo-box">K</div>
+      <div><span>KLE Tech CMS</span><small>cms.kletech.ac.in</small></div>
+    </div>
+    <div class="nav-links">
+      <a href="faculty-home.html" class="active">🏠 Home</a>
+      <a href="faculty-complaint.html">📝 New Complaint</a>
+      <a href="#">📋 My Complaints</a>
+    </div>
+    <div class="nav-right">
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌙</button>
+      <div class="nav-user">
+        <span class="role-badge">👨‍🏫 Faculty</span>
+        <div class="avatar">PS</div>
+        <div>
+          <div style="font-size:13px;font-weight:600;">Dr. Priya Sharma</div>
+          <div style="font-size:11px;opacity:0.7;">CSE Dept · FAC-2021-007</div>
+        </div>
+        <a href="../login.html" class="nav-logout">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Menu</div>
+        <a href="faculty-home.html" class="sidebar-item active"><span class="icon">🏠</span> Dashboard</a>
+        <a href="../student/student-complaint-form.html" class="sidebar-item"><span class="icon">📝</span> New Complaint</a>
+        <a href="../student/student-complaints-list.html" class="sidebar-item"><span class="icon">📋</span> My Complaints</a>
+        <div class="sidebar-item"><span class="icon">🔔</span> Notifications<span class="sidebar-badge">1</span></div>
+        <div class="sidebar-item"><span class="icon">👤</span> My Profile</div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Quick Filter</div>
+        <div class="sidebar-item"><span class="icon">⏳</span> Pending (1)</div>
+        <div class="sidebar-item"><span class="icon">🔧</span> In Progress (1)</div>
+        <div class="sidebar-item"><span class="icon">✅</span> Resolved (2)</div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="welcome-banner">
+        <div>
+          <h2>👋 Good Morning, Dr. Priya!</h2>
+          <p>You have 1 pending complaint. All updates will be sent to your KLE Tech email.</p>
+          <div style="margin-top:8px;font-size:12px;opacity:0.8;">🏛️ KLE Technological University &nbsp;·&nbsp; 📚 CSE Department &nbsp;·&nbsp; 🆔 FAC-2021-007</div>
+        </div>
+        <a href="../student/student-complaint-form.html" class="btn btn-accent">+ New Complaint</a>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card blue">
+          <div class="stat-label">Total Submitted</div>
+          <div class="stat-value">4</div>
+          <div class="stat-sub">All time</div>
+          <div class="stat-icon">📋</div>
+        </div>
+        <div class="stat-card orange">
+          <div class="stat-label">Pending</div>
+          <div class="stat-value">1</div>
+          <div class="stat-sub">Awaiting action</div>
+          <div class="stat-icon">⏳</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-label">In Progress</div>
+          <div class="stat-value">1</div>
+          <div class="stat-sub">Being resolved</div>
+          <div class="stat-icon">🔧</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-label">Resolved</div>
+          <div class="stat-value">2</div>
+          <div class="stat-sub">Completed</div>
+          <div class="stat-icon">✅</div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="quick-actions">
+        <a href="../student/student-complaint-form.html" class="quick-action">
+          <div class="qa-icon">📝</div>
+          <div class="qa-label">File Complaint</div>
+          <div class="qa-sub">Submit new grievance</div>
+        </a>
+        <a href="../student/student-complaints-list.html" class="quick-action">
+          <div class="qa-icon">🔍</div>
+          <div class="qa-label">Track Status</div>
+          <div class="qa-sub">View complaint history</div>
+        </a>
+        <div class="quick-action">
+          <div class="qa-icon">🔔</div>
+          <div class="qa-label">Notifications</div>
+          <div class="qa-sub">1 new update</div>
+        </div>
+        <div class="quick-action">
+          <div class="qa-icon">📥</div>
+          <div class="qa-label">Download Report</div>
+          <div class="qa-sub">My complaint history</div>
+        </div>
+      </div>
+
+      <!-- Recent Complaints -->
+      <div class="card">
+        <div class="card-header">
+          <h3>📋 My Complaints</h3>
+          <div class="chips">
+            <span class="chip active">All</span>
+            <span class="chip">Pending</span>
+            <span class="chip">In Progress</span>
+            <span class="chip">Resolved</span>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Complaint ID</th>
+                <th>Category</th>
+                <th>Subject</th>
+                <th>🔥 Urgency</th>
+                <th>⏳ Status</th>
+                <th>Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="complaint-id">#CMS-2025-043</span></td>
+                <td>🔌 Electrical</td>
+                <td>Projector not working in Room 301</td>
+                <td><span class="badge badge-medium">⚡ Medium</span></td>
+                <td><span class="badge badge-pending">⏳ Pending</span></td>
+                <td>Apr 13, 2025</td>
+                <td><a href="../student/complaint-status.html" class="btn btn-sm btn-outline">View →</a></td>
+              </tr>
+              <tr>
+                <td><span class="complaint-id">#CMS-2025-036</span></td>
+                <td>🌐 Internet</td>
+                <td>LAN not working in Faculty Block</td>
+                <td><span class="badge badge-high">🔥 High</span></td>
+                <td><span class="badge badge-progress">🔧 In Progress</span></td>
+                <td>Apr 8, 2025</td>
+                <td><a href="../student/complaint-status.html" class="btn btn-sm btn-outline">View →</a></td>
+              </tr>
+              <tr>
+                <td><span class="complaint-id">#CMS-2025-022</span></td>
+                <td>🔧 Infrastructure</td>
+                <td>AC not functioning in Staff Room</td>
+                <td><span class="badge badge-low">📋 Low</span></td>
+                <td><span class="badge badge-resolved">✅ Resolved</span></td>
+                <td>Apr 1, 2025</td>
+                <td><a href="../student/complaint-status.html" class="btn btn-sm btn-ghost">View →</a></td>
+              </tr>
+              <tr>
+                <td><span class="complaint-id">#CMS-2025-008</span></td>
+                <td>📚 Library</td>
+                <td>Reference books unavailable for CSE</td>
+                <td><span class="badge badge-medium">⚡ Medium</span></td>
+                <td><span class="badge badge-resolved">✅ Resolved</span></td>
+                <td>Mar 15, 2025</td>
+                <td><a href="../student/complaint-status.html" class="btn btn-sm btn-ghost">View →</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <footer><strong>KLE Technological University CMS</strong> — Web Technologies &amp; SE Project — 2025</footer>
+  <script>
+    function toggleTheme() { var html=document.documentElement; var next=html.getAttribute('data-theme')==='dark'?'light':'dark'; html.setAttribute('data-theme',next); localStorage.setItem('cms-theme',next); document.getElementById('themeToggle').textContent=next==='dark'?'☀️':'🌙'; }
+    document.getElementById('themeToggle').textContent = document.documentElement.getAttribute('data-theme')==='dark'?'☀️':'🌙';
+  </script>
+</body>
+</html>

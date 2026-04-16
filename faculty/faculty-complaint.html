@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Submit Complaint — KLE Tech CMS</title>
+  <script>(function(){ var s=localStorage.getItem('cms-theme')||'light'; document.documentElement.setAttribute('data-theme',s); })();</script>
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    .form-card { max-width: 760px; }
+    .category-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 1rem; }
+    .category-card { border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 12px 8px; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--surface-2); }
+    .category-card:hover { border-color: var(--primary); background: var(--primary-soft); }
+    .category-card.selected { border-color: var(--primary); background: var(--primary-soft); box-shadow: 0 0 0 2px rgba(26,35,126,0.15); }
+    .cat-icon { font-size: 26px; margin-bottom: 5px; }
+    .cat-name { font-size: 11px; font-weight: 600; font-family: 'Sora', sans-serif; color: var(--text); }
+    .urgency-options { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+    .urgency-card { border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 14px; cursor: pointer; transition: all 0.2s; background: var(--surface-2); }
+    .urgency-card:hover { transform: translateY(-1px); }
+    .urgency-card.selected-high { border-color: #c62828; background: #fce4ec; }
+    .urgency-card.selected-medium { border-color: #e65100; background: #fff3e0; }
+    .urgency-card.selected-low { border-color: #2e7d32; background: #e8f5e9; }
+    .urgency-label { font-size: 14px; font-weight: 700; font-family: 'Sora', sans-serif; margin-bottom: 2px; }
+    .urgency-desc { font-size: 11px; color: var(--text-muted); }
+    .char-count { font-size: 11px; color: var(--text-muted); text-align: right; margin-top: 4px; }
+    .anon-toggle { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-2); cursor: pointer; }
+    .toggle { width: 42px; height: 22px; background: var(--border); border-radius: 20px; position: relative; transition: background 0.2s; flex-shrink: 0; }
+    .toggle.on { background: var(--primary); }
+    .toggle::after { content: ''; position: absolute; width: 16px; height: 16px; background: #fff; border-radius: 50%; top: 3px; left: 3px; transition: left 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
+    .toggle.on::after { left: 23px; }
+    .form-actions { display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1.5px solid var(--border); }
+    .success-screen { text-align: center; padding: 2rem; display: none; }
+    .success-icon { font-size: 60px; margin-bottom: 1rem; }
+    .success-id { font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 800; color: var(--primary); margin-bottom: 0.5rem; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-brand">
+      <div class="logo-box">K</div>
+      <div><span>KLE Tech CMS</span><small>cms.kletech.ac.in</small></div>
+    </div>
+    <div class="nav-links">
+      <a href="faculty-home.html">🏠 Home</a>
+      <a href="faculty-complaint.html" class="active">📝 New Complaint</a>
+      <a href="#">📋 My Complaints</a>
+    </div>
+    <div class="nav-right">
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌙</button>
+      <div class="nav-user">
+        <span class="role-badge">👨‍🏫 Faculty</span>
+        <div class="avatar">PS</div>
+        <div><div style="font-size:13px;font-weight:600;"></div><div style="font-size:11px;opacity:0.7;"></div></div>
+        <a href="../login.html" class="nav-logout">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Menu</div>
+        <a href="faculty-home.html" class="sidebar-item"><span class="icon">🏠</span> Dashboard</a>
+        <a href="faculty-complaint.html" class="sidebar-item active"><span class="icon">📝</span> New Complaint</a>
+        <a href="#" class="sidebar-item"><span class="icon">📋</span> My Complaints</a>
+        <div class="sidebar-item"><span class="icon">🔔</span> Notifications<span class="sidebar-badge">3</span></div>
+        <div class="sidebar-item"><span class="icon">👤</span> My Profile</div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="page-header">
+        <div class="breadcrumb">Dashboard › <span>Submit New Complaint</span></div>
+        <h1>📝 Submit a New Complaint</h1>
+        <p>Fill in the form below. You'll receive a unique complaint ID on submission.</p>
+      </div>
+
+      <div class="card form-card">
+        <div class="card-header">
+          <h3>Complaint Details</h3>
+          <span class="badge badge-progress">FR-02</span>
+        </div>
+        <div class="card-body" id="formBody">
+
+          <!-- Category -->
+          <div class="form-group">
+            <label class="form-label">Select Category *</label>
+            <div class="category-grid">
+              <div class="category-card" onclick="selectCat(this)"><div class="cat-icon">🏫</div><div class="cat-name">Academic</div></div>
+              <div class="category-card selected" onclick="selectCat(this)"><div class="cat-icon">🍽️</div><div class="cat-name">Canteen</div></div>
+              <div class="category-card" onclick="selectCat(this)"><div class="cat-icon">🏠</div><div class="cat-name">Hostel</div></div>
+              <div class="category-card" onclick="selectCat(this)"><div class="cat-icon">🚿</div><div class="cat-name">Sanitation</div></div>
+              <div class="category-card" onclick="selectCat(this)"><div class="cat-icon">🔌</div><div class="cat-name">Electrical</div></div>
+              <div class="category-card" onclick="selectCat(this)"><div class="cat-icon">🌐</div><div class="cat-name">Internet</div></div>
+              <div class="category-card" onclick="selectCat(this)"><div class="cat-icon">📚</div><div class="cat-name">Library</div></div>
+              <div class="category-card" onclick="selectCat(this)"><div class="cat-icon">🚌</div><div class="cat-name">Transport</div></div>
+              <div class="category-card" onclick="selectCat(this)"><div class="cat-icon">🔒</div><div class="cat-name">Safety</div></div>
+              <div class="category-card" onclick="selectCat(this)"><div class="cat-icon">💻</div><div class="cat-name">IT / WiFi</div></div>
+              <div class="category-card" onclick="selectCat(this)"><div class="cat-icon">🔧</div><div class="cat-name">Infrastructure</div></div>
+              <div class="category-card" onclick="selectCat(this)"><div class="cat-icon">📦</div><div class="cat-name">Other</div></div>
+            </div>
+          </div>
+
+          <!-- Urgency -->
+          <div class="form-group">
+            <label class="form-label">Urgency Level *</label>
+            <div class="urgency-options">
+              <div class="urgency-card" onclick="selectUrgency(this,'high')" style="border-color:#c62828;">
+                <div style="font-size:22px;margin-bottom:4px;">🔴</div>
+                <div class="urgency-label" style="color:#c62828;">High</div>
+                <div class="urgency-desc">Needs immediate attention</div>
+              </div>
+              <div class="urgency-card selected-medium" onclick="selectUrgency(this,'medium')">
+                <div style="font-size:22px;margin-bottom:4px;">🟡</div>
+                <div class="urgency-label" style="color:#e65100;">Medium</div>
+                <div class="urgency-desc">Should be resolved within 3 days</div>
+              </div>
+              <div class="urgency-card" onclick="selectUrgency(this,'low')">
+                <div style="font-size:22px;margin-bottom:4px;">🟢</div>
+                <div class="urgency-label" style="color:#2e7d32;">Low</div>
+                <div class="urgency-desc">General feedback / non-urgent</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Subject -->
+          <div class="form-group">
+            <label class="form-label">Subject / Title *</label>
+            <input type="text" class="form-control" placeholder="Brief title of your complaint (max 100 chars)" maxlength="100">
+          </div>
+
+          <!-- Description -->
+          <div class="form-group">
+            <label class="form-label">Description *</label>
+            <textarea class="form-control" placeholder="Describe your complaint in detail. Include location, date, and specifics." id="desc" style="min-height:130px;"></textarea>
+            <div class="char-count"><span id="cc">248</span> / 1000 characters</div>
+          </div>
+
+          <!-- Upload -->
+          <div class="form-group">
+            <label class="form-label">📷 Attach Evidence (Optional)</label>
+            <div class="upload-area" onclick="this.querySelector('input').click()">
+              <div class="upload-icon">📎</div>
+              <div class="upload-text"><strong>Click to upload</strong> or drag &amp; drop<br>PNG, JPG, PDF up to 5MB</div>
+              <input type="file" style="display:none" accept="image/*,.pdf">
+            </div>
+          </div>
+
+          <!-- Anonymous -->
+          <div class="form-group">
+            <label class="form-label">Anonymous Submission</label>
+            <div class="anon-toggle" onclick="document.getElementById('anonT').classList.toggle('on')">
+              <div class="toggle" id="anonT"></div>
+              <div>
+                <div style="font-size:13px;font-weight:600;">👤 Submit Anonymously</div>
+                <div style="font-size:12px;color:var(--text-muted);">Your identity will be hidden from workers. Complies with privacy policy.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="alert alert-info">
+            ℹ️ After submission, your complaint will be assigned a unique ID and status set to <strong>Pending</strong>. You'll receive an email confirmation at your KLE Tech email.
+          </div>
+
+          <div class="form-actions">
+            <a href="student-home.html" class="btn btn-ghost">Cancel</a>
+            <button class="btn btn-outline">Save Draft</button>
+            <button class="btn btn-primary" onclick="submitComplaint()">Submit Complaint →</button>
+          </div>
+        </div>
+
+        <!-- Success State -->
+        <div class="success-screen" id="successScreen">
+          <div class="success-icon">🎉</div>
+          <div class="success-id">#CMS-2025-049</div>
+          <h2 style="margin-bottom:8px;">Complaint Submitted!</h2>
+          <p style="color:var(--text-muted);margin-bottom:1.5rem;">Your complaint has been registered. An email confirmation has been sent to your KLE Tech email.</p>
+          <div class="alert alert-success" style="text-align:left;">
+            ✅ Status set to <strong>Pending</strong> &nbsp;·&nbsp; 📧 Email sent to 01fe24bcs141@kletech.ac.in
+          </div>
+          <div style="display:flex;gap:1rem;justify-content:center;margin-top:1.5rem;">
+            <a href="complaint-status.html" class="btn btn-primary">Track Status</a>
+            <a href="student-home.html" class="btn btn-outline">Back to Dashboard</a>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <footer><strong>KLE Technological University CMS</strong> — Web Technologies &amp; SE Project — 2025</footer>
+  <script>
+    function selectCat(el) { document.querySelectorAll('.category-card').forEach(c=>c.classList.remove('selected')); el.classList.add('selected'); }
+    function selectUrgency(el, level) { document.querySelectorAll('.urgency-card').forEach(c=>c.classList.remove('selected-high','selected-medium','selected-low')); el.classList.add('selected-'+level); }
+    document.getElementById('desc').addEventListener('input', function(){ document.getElementById('cc').textContent = this.value.length; });
+    function submitComplaint() { document.getElementById('formBody').style.display='none'; document.getElementById('successScreen').style.display='block'; }
+    function toggleTheme() { var html=document.documentElement; var next=html.getAttribute('data-theme')==='dark'?'light':'dark'; html.setAttribute('data-theme',next); localStorage.setItem('cms-theme',next); document.getElementById('themeToggle').textContent=next==='dark'?'☀️':'🌙'; }
+    document.getElementById('themeToggle').textContent = document.documentElement.getAttribute('data-theme')==='dark'?'☀️':'🌙';
+  </script>
+</body>
+</html>
